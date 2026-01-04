@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct ShokupaniosApp: App {
@@ -13,5 +14,6 @@ struct ShokupaniosApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [Recipe.self, Ingredient.self, RecipeTemplate.self, TemplateIngredient.self])
     }
 }

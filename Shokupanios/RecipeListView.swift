@@ -1,0 +1,296 @@
+import SwiftUI
+import SwiftData
+
+struct RecipeListView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Recipe.lastModifiedDate, order: .reverse) private var recipes: [Recipe]
+    @State private var showingAddRecipe = false
+    @State private var searchText = ""
+    @State private var filterTag: String?
+    @State private var hydrationFilter: HydrationRange = .any
+
+    enum HydrationRange: String, CaseIterable {
+        case any = "Any"
+        case low = "< 65%"
+        case medium = "65-75%"
+        case high = "> 75%"
+
+        var icon: String {
+            switch self {
+            case .any: return "drop"
+            case .low: return "drop.fill"
+            case .medium: return "drop.halffull"
+            case .high: return "drop.fill"
+            }
+        }
+    }
+
+    var filteredRecipes: [Recipe] {
+        recipes.filter { recipe in
+            let matchesSearch = searchText.isEmpty ||
+                recipe.name.localizedCaseInsensitiveContains(searchText) ||
+                recipe.tags.contains { $0.localizedCaseInsensitiveContains(searchText) }
+
+            let matchesTag = filterTag == nil || recipe.tags.contains(filterTag!)
+
+            let matchesHydration: Bool
+            switch hydrationFilter {
+            case .any:
+                matchesHydration = true
+            case .low:
+                matchesHydration = recipe.hydrationPercentage < 65
+            case .medium:
+                matchesHydration = recipe.hydrationPercentage >= 65 && recipe.hydrationPercentage <= 75
+            case .high:
+                matchesHydration = recipe.hydrationPercentage > 75
+            }
+
+            return matchesSearch && matchesTag && matchesHydration
+        }
+    }
+
+    var allTags: [String] {
+        Array(Set(recipes.flatMap { $0.tags })).sorted()
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                WarmGradientBackground()
+
+                if recipes.isEmpty {
+                    EmptyStateView(
+                        icon: "oven",
+                        title: "No Recipes Yet",
+                        message: "Start your baking journey by creating your first recipe",
+                        actionTitle: "Create Recipe",
+                        action: { showingAddRecipe = true }
+                    )
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: Spacing.md) {
+                            // Filter Section
+                            if !allTags.isEmpty {
+                                filterSection
+                            }
+
+                            // Recipe Cards
+                            ForEach(filteredRecipes) { recipe in
+                                NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                                    RecipeCard(recipe: recipe)
+                                }
+                                .buttonStyle(.plain)
+                            }
+
+                            if filteredRecipes.isEmpty && !recipes.isEmpty {
+                                noResultsView
+                            }
+                        }
+                        .padding(.horizontal, Spacing.md)
+                        .padding(.vertical, Spacing.sm)
+                    }
+                    .scrollIndicators(.hidden)
+                }
+            }
+            .navigationTitle("Recipes")
+            .navigationBarTitleDisplayMode(.large)
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search recipes..."
+            )
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showingAddRecipe = true }) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.terracotta)
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAddRecipe) {
+                AddRecipeView()
+            }
+        }
+        .tint(.terracotta)
+    }
+
+    // MARK: - Filter Section
+
+    private var filterSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            // Hydration Filter
+            HStack(spacing: Spacing.sm) {
+                ForEach(HydrationRange.allCases, id: \.self) { range in
+                    Button {
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            hydrationFilter = range
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            if range != .any {
+                                Image(systemName: range.icon)
+                                    .font(.system(size: 10))
+                            }
+                            Text(range.rawValue)
+                        }
+                        .tagChip(selected: hydrationFilter == range)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            // Tag Filter
+            if !allTags.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: Spacing.sm) {
+                        Button {
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                filterTag = nil
+                            }
+                        } label: {
+                            Text("All")
+                                .tagChip(selected: filterTag == nil)
+                        }
+                        .buttonStyle(.plain)
+
+                        ForEach(allTags, id: \.self) { tag in
+                            Button {
+                                withAnimation(.easeOut(duration: 0.2)) {
+                                    filterTag = filterTag == tag ? nil : tag
+                                }
+                            } label: {
+                                Text(tag)
+                                    .tagChip(selected: filterTag == tag)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.vertical, Spacing.sm)
+    }
+
+    private var noResultsView: some View {
+        VStack(spacing: Spacing.md) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 32, weight: .light))
+                .foregroundColor(.stoneGray.opacity(0.5))
+
+            Text("No recipes found")
+                .font(.bakeryBody(15))
+                .foregroundColor(.stoneGray)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Spacing.xxl)
+    }
+
+    private func deleteRecipes(offsets: IndexSet) {
+        for index in offsets {
+            let recipe = filteredRecipes[index]
+            modelContext.delete(recipe)
+        }
+    }
+}
+
+// MARK: - Recipe Card
+
+struct RecipeCard: View {
+    let recipe: Recipe
+    @AppStorage("useMetricUnits") private var useMetricUnits = true
+
+    var body: some View {
+        HStack(spacing: Spacing.md) {
+            // Thumbnail
+            recipeImage
+                .frame(width: 72, height: 72)
+                .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous))
+
+            // Content
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                Text(recipe.name)
+                    .font(.bakerySerifMedium(18))
+                    .foregroundColor(.inkBrown)
+                    .lineLimit(1)
+
+                // Metadata row
+                HStack(spacing: Spacing.md) {
+                    FlourWeightBadge(weight: formatWeight(recipe.totalFlourGrams))
+
+                    if recipe.hydrationPercentage > 0 {
+                        HydrationIndicator(percentage: Int(recipe.hydrationPercentage))
+                    }
+                }
+
+                // Tags
+                if !recipe.tags.isEmpty {
+                    HStack(spacing: Spacing.xs) {
+                        ForEach(recipe.tags.prefix(2), id: \.self) { tag in
+                            ColoredTagChipOutlined(tag: tag)
+                        }
+                        if recipe.tags.count > 2 {
+                            Text("+\(recipe.tags.count - 2)")
+                                .font(.bakeryBody(11))
+                                .foregroundColor(.stoneGray)
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+
+            // Chevron
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.stoneGray.opacity(0.4))
+        }
+        .padding(Spacing.md)
+        .warmCard(elevated: false)
+    }
+
+    @ViewBuilder
+    private var recipeImage: some View {
+        if let photoData = recipe.photoData, let uiImage = UIImage(data: photoData) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+        } else {
+            ZStack {
+                Color.panCrumb
+                Image(systemName: "photo")
+                    .font(.system(size: 20, weight: .light))
+                    .foregroundColor(.crustBrown.opacity(0.4))
+            }
+        }
+    }
+
+    private func formatWeight(_ grams: Double) -> String {
+        if useMetricUnits {
+            return "\(Int(grams))g"
+        } else {
+            let ounces = grams / 28.3495
+            return String(format: "%.1foz", ounces)
+        }
+    }
+}
+
+#Preview {
+    let container = try! ModelContainer(
+        for: Recipe.self, Ingredient.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+
+    let recipe1 = Recipe(name: "Shokupan", totalFlourGrams: 250, notes: "First attempt", tags: ["japanese", "milk bread"])
+    recipe1.ingredients.append(Ingredient(name: "Flour", percentage: 1.0, section: .finalDough))
+    recipe1.ingredients.append(Ingredient(name: "Water", percentage: 0.65, section: .finalDough))
+    container.mainContext.insert(recipe1)
+
+    let recipe2 = Recipe(name: "Sourdough Boule", totalFlourGrams: 500, notes: "", tags: ["sourdough", "artisan"])
+    recipe2.ingredients.append(Ingredient(name: "Flour", percentage: 1.0, section: .finalDough))
+    recipe2.ingredients.append(Ingredient(name: "Water", percentage: 0.75, section: .finalDough))
+    container.mainContext.insert(recipe2)
+
+    return RecipeListView()
+        .modelContainer(container)
+}
