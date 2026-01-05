@@ -42,18 +42,22 @@ A wabi-sabi inspired design system for the Shokupan bread baking app. The aesthe
 | Yeast Gold | `rgb(0.85, 0.72, 0.45)` | Special highlights |
 
 ### Tag Colors
-A muted, calm palette for recipe tags. Colors are assigned consistently based on tag name hash.
+A Studio Ghibli inspired palette for recipe tags. Colors are assigned consistently based on tag name hash.
 
-| Name | RGB | Description |
-|------|-----|-------------|
-| Warm Clay | `rgb(0.76, 0.60, 0.50)` | Earthy terracotta variant |
-| Sage Green | `rgb(0.65, 0.70, 0.62)` | Soft herbal green |
-| Dusty Mauve | `rgb(0.70, 0.62, 0.68)` | Muted purple-pink |
-| Wheat | `rgb(0.72, 0.68, 0.58)` | Golden grain tone |
-| Slate Blue | `rgb(0.60, 0.65, 0.70)` | Cool muted blue |
-| Dusty Rose | `rgb(0.75, 0.58, 0.58)` | Soft pink-brown |
-| Seafoam | `rgb(0.58, 0.68, 0.65)` | Calm teal-green |
-| Mushroom | `rgb(0.68, 0.60, 0.55)` | Neutral earthy brown |
+| Name | RGB | Source |
+|------|-----|--------|
+| Spirited Away Red | `rgb(0.80, 0.33, 0.30)` | Chihiro's hair tie |
+| Spirited Away Blue | `rgb(0.20, 0.45, 0.55)` | Deep teal |
+| Totoro Light Green | `rgb(0.56, 0.72, 0.52)` | Forest meadow |
+| Totoro Dark Green | `rgb(0.35, 0.55, 0.35)` | Deep forest |
+| Howl's Sky Blue | `rgb(0.68, 0.82, 0.95)` | Clear sky |
+| Howl's Coral | `rgb(0.90, 0.52, 0.40)` | Sunset orange |
+| Mononoke Forest | `rgb(0.22, 0.38, 0.28)` | Ancient forest |
+| Mononoke Sage | `rgb(0.58, 0.68, 0.52)` | Forest floor |
+| Kiki's Red | `rgb(0.75, 0.35, 0.32)` | Kiki's bow |
+| Wind Rises Blue | `rgb(0.30, 0.55, 0.72)` | Aviation blue |
+| Wind Rises Peach | `rgb(0.88, 0.72, 0.55)` | Warm sunset |
+| Wind Rises Olive | `rgb(0.60, 0.68, 0.50)` | Grassy hills |
 
 ```swift
 // Get consistent color for a tag

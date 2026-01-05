@@ -10,16 +10,61 @@ struct AddTemplateView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Template Details") {
-                    TextField("Template Name", text: $name)
-                    TextField("Description (optional)", text: $descriptionText)
-                }
+            ZStack {
+                Color.panCream.ignoresSafeArea()
 
-                Section {
-                    Text("After creating the template, you can add ingredients from the detail view.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        // Template Name
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            Text("Template Name")
+                                .sectionHeader()
+
+                            TextField("e.g., My Sourdough", text: $name)
+                                .font(.bakeryBody(16))
+                                .foregroundColor(.inkBrown)
+                                .padding(Spacing.md)
+                                .background(
+                                    RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                                        .fill(Color.flourWhite)
+                                )
+                        }
+                        .padding(Spacing.lg)
+                        .warmCard()
+
+                        // Description
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            Text("Description")
+                                .sectionHeader()
+
+                            TextField("Optional description", text: $descriptionText)
+                                .font(.bakeryBody(16))
+                                .foregroundColor(.inkBrown)
+                                .padding(Spacing.md)
+                                .background(
+                                    RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                                        .fill(Color.flourWhite)
+                                )
+                        }
+                        .padding(Spacing.lg)
+                        .warmCard()
+
+                        // Info
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            HStack(spacing: Spacing.sm) {
+                                Image(systemName: "info.circle")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.terracotta.opacity(0.7))
+
+                                Text("After creating the template, you can add ingredients from the detail view.")
+                                    .font(.bakeryBody(13))
+                                    .foregroundColor(.stoneGray)
+                            }
+                        }
+                        .padding(Spacing.lg)
+                        .warmCard()
+                    }
+                    .padding(Spacing.md)
                 }
             }
             .navigationTitle("New Template")
@@ -29,11 +74,14 @@ struct AddTemplateView: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .foregroundColor(.stoneGray)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Create") {
                         saveTemplate()
                     }
+                    .font(.bakeryBodyMedium(16))
+                    .foregroundColor(.terracotta)
                     .disabled(name.isEmpty)
                 }
             }

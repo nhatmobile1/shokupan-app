@@ -84,7 +84,26 @@ class TemplateIngredient {
 
 // MARK: - Default Templates
 struct DefaultTemplates {
+    // Increment this version number when built-in templates need to be refreshed
+    private static let currentVersion = 2
+    private static let versionKey = "builtInTemplatesVersion"
+
     static func seedTemplates(in context: ModelContext) {
+        let savedVersion = UserDefaults.standard.integer(forKey: versionKey)
+
+        // If version changed, delete old built-in templates
+        if savedVersion != currentVersion {
+            let descriptor = FetchDescriptor<RecipeTemplate>(
+                predicate: #Predicate { $0.isBuiltIn == true }
+            )
+            if let existingTemplates = try? context.fetch(descriptor) {
+                for template in existingTemplates {
+                    context.delete(template)
+                }
+            }
+            try? context.save()
+        }
+
         // Check if templates already exist
         let descriptor = FetchDescriptor<RecipeTemplate>(
             predicate: #Predicate { $0.isBuiltIn == true }
@@ -178,5 +197,8 @@ struct DefaultTemplates {
         context.insert(whiteBread)
 
         try? context.save()
+
+        // Save the current version
+        UserDefaults.standard.set(currentVersion, forKey: versionKey)
     }
 }

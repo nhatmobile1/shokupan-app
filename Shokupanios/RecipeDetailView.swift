@@ -15,6 +15,9 @@ struct RecipeDetailView: View {
     @State private var scaleMode: ScaleMode = .flour
     @State private var inputAmount = ""
     @State private var showingShareSheet = false
+    @State private var showingPhotoOptions = false
+    @State private var showingCamera = false
+    @State private var showingPhotoPicker = false
 
     // Global settings
     @AppStorage("useMetricUnits") private var useMetricUnits = true
@@ -112,6 +115,32 @@ struct RecipeDetailView: View {
         .sheet(isPresented: $showingShareSheet) {
             ShareSheet(items: generateShareItems())
         }
+        .confirmationDialog("Add Photo", isPresented: $showingPhotoOptions, titleVisibility: .visible) {
+            Button("Take Photo") {
+                showingCamera = true
+            }
+            Button("Choose from Library") {
+                showingPhotoPicker = true
+            }
+            Button("Cancel", role: .cancel) { }
+        }
+        .sheet(isPresented: $showingCamera) {
+            CameraPicker { image in
+                if let data = image.jpegData(compressionQuality: 0.8) {
+                    recipe.photoData = data
+                    recipe.lastModifiedDate = Date()
+                }
+            }
+        }
+        .sheet(isPresented: $showingPhotoPicker) {
+            PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                Text("Select Photo")
+            }
+            .photosPickerStyle(.inline)
+            .photosPickerDisabledCapabilities(.selectionActions)
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
         .tint(.terracotta)
     }
 
@@ -140,8 +169,10 @@ struct RecipeDetailView: View {
                 .frame(height: 200)
             }
 
-            // Photo picker button
-            PhotosPicker(selection: $selectedPhoto, matching: .images) {
+            // Photo button
+            Button {
+                showingPhotoOptions = true
+            } label: {
                 Image(systemName: "camera.fill")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.flourWhite)
@@ -501,6 +532,15 @@ struct RecipeDetailView: View {
         }
     }
 
+    private func formatPercentage(_ value: Double) -> String {
+        let rounded = (value * 10).rounded() / 10
+        if rounded == rounded.rounded() {
+            return "\(Int(rounded))%"
+        } else {
+            return String(format: "%.1f%%", rounded)
+        }
+    }
+
     private func generateShareItems() -> [Any] {
         var items: [Any] = []
 
@@ -516,7 +556,7 @@ struct RecipeDetailView: View {
             text += "[\(section.rawValue)]\n"
             for ingredient in ingredientsFor(section: section) {
                 let weight = formatWeight(ingredient.weight(basedOn: recipe.totalFlourGrams))
-                text += "• \(ingredient.name): \(weight) (\(Int(ingredient.percentage * 100))%)\n"
+                text += "• \(ingredient.name): \(weight) (\(formatPercentage(ingredient.percentage * 100)))\n"
             }
             text += "\n"
         }
@@ -621,6 +661,15 @@ struct IngredientRow: View {
     let ingredient: Ingredient
     let weight: String
 
+    private func formatPercentage(_ value: Double) -> String {
+        let rounded = (value * 10).rounded() / 10  // Round to 1 decimal place
+        if rounded == rounded.rounded() {
+            return "\(Int(rounded))%"
+        } else {
+            return String(format: "%.1f%%", rounded)
+        }
+    }
+
     var body: some View {
         HStack {
             Text(ingredient.name)
@@ -634,7 +683,7 @@ struct IngredientRow: View {
                     .font(.bakeryMono(15))
                     .foregroundColor(.inkBrown)
 
-                Text("\(Int(ingredient.percentage * 100))%")
+                Text(formatPercentage(ingredient.percentage * 100))
                     .font(.bakeryMono(12))
                     .foregroundColor(.stoneGray)
             }
@@ -695,6 +744,44 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// MARK: - Camera Picker
+
+struct CameraPicker: UIViewControllerRepresentable {
+    var onImagePicked: (UIImage) -> Void
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImagePicked: onImagePicked)
+    }
+
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        var onImagePicked: (UIImage) -> Void
+
+        init(onImagePicked: @escaping (UIImage) -> Void) {
+            self.onImagePicked = onImagePicked
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                onImagePicked(image)
+            }
+            picker.dismiss(animated: true)
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            picker.dismiss(animated: true)
+        }
+    }
 }
 
 #Preview {

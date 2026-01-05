@@ -280,6 +280,15 @@ struct TemplateIngredientRow: View {
     var canDelete: Bool = false
     var onDelete: (() -> Void)?
 
+    private func formatPercentage(_ value: Double) -> String {
+        let rounded = (value * 10).rounded() / 10  // Round to 1 decimal place
+        if rounded == rounded.rounded() {
+            return "\(Int(rounded))%"
+        } else {
+            return String(format: "%.1f%%", rounded)
+        }
+    }
+
     var body: some View {
         HStack {
             Text(ingredient.name)
@@ -288,7 +297,7 @@ struct TemplateIngredientRow: View {
 
             Spacer()
 
-            Text("\(Int(ingredient.percentage * 100))%")
+            Text(formatPercentage(ingredient.percentage * 100))
                 .font(.bakeryMono(15))
                 .foregroundColor(.warmBrown)
 

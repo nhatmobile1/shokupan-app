@@ -27,20 +27,20 @@ extension Color {
     static let prefermentColor = Color(red: 0.72, green: 0.65, blue: 0.55)
     static let finalDoughColor = Color(red: 0.80, green: 0.52, blue: 0.40)
 
-    // Tag colors - Studio Ghibli inspired pastel palette
+    // Tag colors - Studio Ghibli inspired palette
     static let tagColors: [Color] = [
-        Color(red: 0.85, green: 0.42, blue: 0.38),  // Ghibli red (Spirited Away)
-        Color(red: 0.55, green: 0.75, blue: 0.55),  // Totoro green
-        Color(red: 0.45, green: 0.60, blue: 0.80),  // Sky blue (Howl's)
-        Color(red: 0.80, green: 0.60, blue: 0.45),  // Warm tan (Totoro)
-        Color(red: 0.65, green: 0.50, blue: 0.65),  // Dusty purple
-        Color(red: 0.35, green: 0.55, blue: 0.50),  // Forest green (Mononoke)
-        Color(red: 0.75, green: 0.55, blue: 0.55),  // Dusty rose
-        Color(red: 0.50, green: 0.58, blue: 0.70),  // Slate blue (Wind Rises)
-        Color(red: 0.70, green: 0.55, blue: 0.40),  // Caramel brown
-        Color(red: 0.55, green: 0.70, blue: 0.70),  // Seafoam teal
-        Color(red: 0.80, green: 0.50, blue: 0.45),  // Coral (Kiki's)
-        Color(red: 0.45, green: 0.65, blue: 0.55),  // Sage green
+        Color(red: 0.80, green: 0.33, blue: 0.30),  // Spirited Away red
+        Color(red: 0.20, green: 0.45, blue: 0.55),  // Spirited Away blue
+        Color(red: 0.56, green: 0.72, blue: 0.52),  // Totoro light green
+        Color(red: 0.35, green: 0.55, blue: 0.35),  // Totoro dark green
+        Color(red: 0.68, green: 0.82, blue: 0.95),  // Howl's sky blue
+        Color(red: 0.90, green: 0.52, blue: 0.40),  // Howl's coral
+        Color(red: 0.22, green: 0.38, blue: 0.28),  // Mononoke forest
+        Color(red: 0.58, green: 0.68, blue: 0.52),  // Mononoke sage
+        Color(red: 0.75, green: 0.35, blue: 0.32),  // Kiki's red
+        Color(red: 0.30, green: 0.55, blue: 0.72),  // Wind Rises blue
+        Color(red: 0.88, green: 0.72, blue: 0.55),  // Wind Rises peach
+        Color(red: 0.60, green: 0.68, blue: 0.50),  // Wind Rises olive
     ]
 
     /// Returns a consistent color for a given tag string
@@ -425,15 +425,19 @@ struct WarmGradientBackground: View {
                 Text("Tags")
                     .sectionHeader()
 
-                FlowLayout(spacing: Spacing.sm) {
-                    ColoredTagChip(tag: "japanese")
-                    ColoredTagChip(tag: "milk bread")
-                    ColoredTagChip(tag: "sourdough")
-                    ColoredTagChip(tag: "artisan")
-                    ColoredTagChip(tag: "enriched")
-                    ColoredTagChip(tag: "poolish")
-                    ColoredTagChip(tag: "tangzhong")
-                    ColoredTagChip(tag: "brioche")
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    HStack(spacing: Spacing.sm) {
+                        ColoredTagChip(tag: "japanese")
+                        ColoredTagChip(tag: "milk bread")
+                        ColoredTagChip(tag: "sourdough")
+                        ColoredTagChip(tag: "artisan")
+                    }
+                    HStack(spacing: Spacing.sm) {
+                        ColoredTagChip(tag: "enriched")
+                        ColoredTagChip(tag: "poolish")
+                        ColoredTagChip(tag: "tangzhong")
+                        ColoredTagChip(tag: "brioche")
+                    }
                 }
 
                 Text("Outlined variant")
