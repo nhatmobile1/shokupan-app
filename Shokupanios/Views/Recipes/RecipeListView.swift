@@ -8,6 +8,8 @@ struct RecipeListView: View {
     @State private var searchText = ""
     @State private var filterTag: String?
     @State private var hydrationFilter: HydrationRange = .any
+    @State private var recipeToDelete: Recipe?
+    @State private var showingDeleteConfirmation = false
 
     enum HydrationRange: String, CaseIterable {
         case any = "Any"
@@ -67,28 +69,46 @@ struct RecipeListView: View {
                         action: { showingAddRecipe = true }
                     )
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: Spacing.md) {
-                            // Filter Section
-                            if !allTags.isEmpty {
+                    List {
+                        // Filter Section
+                        if !allTags.isEmpty {
+                            Section {
                                 filterSection
                             }
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 0, leading: Spacing.md, bottom: 0, trailing: Spacing.md))
+                            .listRowSeparator(.hidden)
+                        }
 
-                            // Recipe Cards
+                        // Recipe Cards
+                        Section {
                             ForEach(filteredRecipes) { recipe in
                                 NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
                                     RecipeCard(recipe: recipe)
                                 }
                                 .buttonStyle(.plain)
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: Spacing.sm / 2, leading: Spacing.md, bottom: Spacing.sm / 2, trailing: Spacing.md))
+                                .listRowSeparator(.hidden)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        recipeToDelete = recipe
+                                        showingDeleteConfirmation = true
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
                             }
 
                             if filteredRecipes.isEmpty && !recipes.isEmpty {
                                 noResultsView
+                                    .listRowBackground(Color.clear)
+                                    .listRowSeparator(.hidden)
                             }
                         }
-                        .padding(.horizontal, Spacing.md)
-                        .padding(.vertical, Spacing.sm)
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
                     .scrollIndicators(.hidden)
                 }
             }
@@ -110,6 +130,20 @@ struct RecipeListView: View {
             }
             .sheet(isPresented: $showingAddRecipe) {
                 AddRecipeView()
+            }
+            .alert("Delete Recipe?", isPresented: $showingDeleteConfirmation) {
+                Button("Cancel", role: .cancel) {
+                    recipeToDelete = nil
+                }
+                Button("Delete", role: .destructive) {
+                    if let recipe = recipeToDelete {
+                        deleteRecipe(recipe)
+                    }
+                }
+            } message: {
+                if let recipe = recipeToDelete {
+                    Text("Are you sure you want to delete \"\(recipe.name)\"? This cannot be undone.")
+                }
             }
         }
         .tint(.terracotta)
@@ -186,11 +220,9 @@ struct RecipeListView: View {
         .padding(.vertical, Spacing.xxl)
     }
 
-    private func deleteRecipes(offsets: IndexSet) {
-        for index in offsets {
-            let recipe = filteredRecipes[index]
-            modelContext.delete(recipe)
-        }
+    private func deleteRecipe(_ recipe: Recipe) {
+        modelContext.delete(recipe)
+        recipeToDelete = nil
     }
 }
 
@@ -237,14 +269,8 @@ struct RecipeCard: View {
                     }
                 }
             }
-
-            Spacer()
-
-            // Chevron
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.stoneGray.opacity(0.4))
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .warmCard(elevated: false)
     }
@@ -267,7 +293,11 @@ struct RecipeCard: View {
 
     private func formatWeight(_ grams: Double) -> String {
         if useMetricUnits {
-            return "\(Int(grams))g"
+            if grams == grams.rounded() {
+                return "\(Int(grams))g"
+            } else {
+                return String(format: "%.1fg", grams)
+            }
         } else {
             let ounces = grams / 28.3495
             return String(format: "%.1foz", ounces)

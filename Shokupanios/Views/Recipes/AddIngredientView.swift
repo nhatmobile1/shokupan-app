@@ -99,7 +99,7 @@ struct AddIngredientView: View {
 
                                 Spacer()
 
-                                Text("\(Int((recipe.totalFlourGrams * percentage / 100).rounded()))g")
+                                Text(formatWeight(recipe.totalFlourGrams * percentage / 100))
                                     .font(.bakeryMono(16))
                                     .foregroundColor(.warmBrown)
                             }
@@ -145,6 +145,14 @@ struct AddIngredientView: View {
         recipe.ingredients.append(ingredient)
         recipe.lastModifiedDate = Date()
         dismiss()
+    }
+
+    private func formatWeight(_ grams: Double) -> String {
+        if grams == grams.rounded() {
+            return "\(Int(grams))g"
+        } else {
+            return String(format: "%.1fg", grams)
+        }
     }
 }
 

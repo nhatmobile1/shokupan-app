@@ -525,7 +525,11 @@ struct RecipeDetailView: View {
 
     private func formatWeight(_ grams: Double) -> String {
         if useMetricUnits {
-            return "\(Int(grams))g"
+            if grams == grams.rounded() {
+                return "\(Int(grams))g"
+            } else {
+                return String(format: "%.1fg", grams)
+            }
         } else {
             let ounces = grams / 28.3495
             return String(format: "%.1f oz", ounces)

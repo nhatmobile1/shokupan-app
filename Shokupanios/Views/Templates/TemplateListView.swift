@@ -31,28 +31,84 @@ struct TemplateListView: View {
                         action: { showingAddTemplate = true }
                     )
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: Spacing.md) {
-                            // Built-in Templates Section
-                            if !builtInTemplates.isEmpty {
-                                templateSection(
-                                    title: "Built-in Templates",
-                                    templates: builtInTemplates,
-                                    icon: "checkmark.seal.fill"
-                                )
-                            }
+                    List {
+                        // Built-in Templates Section
+                        if !builtInTemplates.isEmpty {
+                            Section {
+                                HStack(spacing: Spacing.sm) {
+                                    Image(systemName: "checkmark.seal.fill")
+                                        .font(.system(size: 10))
+                                        .foregroundColor(.crustBrown)
+                                    Text("Built-in Templates")
+                                        .sectionHeader()
+                                }
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: Spacing.sm, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+                                .listRowSeparator(.hidden)
 
-                            // User Templates Section
-                            templateSection(
-                                title: "My Templates",
-                                templates: userTemplates,
-                                icon: "person.fill",
-                                allowDelete: true
-                            )
+                                ForEach(builtInTemplates) { template in
+                                    NavigationLink(destination: TemplateDetailView(template: template)) {
+                                        TemplateCard(template: template)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .listRowBackground(Color.clear)
+                                    .listRowInsets(EdgeInsets(top: Spacing.sm / 2, leading: Spacing.md, bottom: Spacing.sm / 2, trailing: Spacing.md))
+                                    .listRowSeparator(.hidden)
+                                }
+                            }
                         }
-                        .padding(.horizontal, Spacing.md)
-                        .padding(.vertical, Spacing.sm)
+
+                        // User Templates Section
+                        Section {
+                            HStack(spacing: Spacing.sm) {
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.crustBrown)
+                                Text("My Templates")
+                                    .sectionHeader()
+                            }
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: Spacing.sm, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+                            .listRowSeparator(.hidden)
+
+                            if userTemplates.isEmpty {
+                                VStack(spacing: Spacing.md) {
+                                    Image(systemName: "doc.badge.plus")
+                                        .font(.system(size: 28, weight: .light))
+                                        .foregroundColor(.crustBrown.opacity(0.4))
+                                    Text("No custom templates yet")
+                                        .font(.bakeryBody(14))
+                                        .foregroundColor(.stoneGray)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, Spacing.xl)
+                                .warmCard()
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: Spacing.sm / 2, leading: Spacing.md, bottom: Spacing.sm / 2, trailing: Spacing.md))
+                                .listRowSeparator(.hidden)
+                            } else {
+                                ForEach(userTemplates) { template in
+                                    NavigationLink(destination: TemplateDetailView(template: template)) {
+                                        TemplateCard(template: template)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .listRowBackground(Color.clear)
+                                    .listRowInsets(EdgeInsets(top: Spacing.sm / 2, leading: Spacing.md, bottom: Spacing.sm / 2, trailing: Spacing.md))
+                                    .listRowSeparator(.hidden)
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            templateToDelete = template
+                                            showingDeleteConfirmation = true
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
                     .scrollIndicators(.hidden)
                 }
             }
@@ -93,46 +149,6 @@ struct TemplateListView: View {
         .tint(.terracotta)
     }
 
-    // MARK: - Template Section
-
-    @ViewBuilder
-    private func templateSection(title: String, templates: [RecipeTemplate], icon: String, allowDelete: Bool = false) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            HStack(spacing: Spacing.sm) {
-                Image(systemName: icon)
-                    .font(.system(size: 10))
-                    .foregroundColor(.crustBrown)
-                Text(title)
-                    .sectionHeader()
-            }
-
-            if templates.isEmpty && allowDelete {
-                // Empty state for user templates
-                VStack(spacing: Spacing.md) {
-                    Image(systemName: "doc.badge.plus")
-                        .font(.system(size: 28, weight: .light))
-                        .foregroundColor(.crustBrown.opacity(0.4))
-                    Text("No custom templates yet")
-                        .font(.bakeryBody(14))
-                        .foregroundColor(.stoneGray)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.xl)
-                .warmCard()
-            } else {
-                ForEach(templates) { template in
-                    NavigationLink(destination: TemplateDetailView(template: template)) {
-                        TemplateCard(template: template, onDelete: allowDelete ? {
-                            templateToDelete = template
-                            showingDeleteConfirmation = true
-                        } : nil)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
     // MARK: - Computed Properties
 
     private var builtInTemplates: [RecipeTemplate] {
@@ -155,7 +171,7 @@ struct TemplateListView: View {
 
 struct TemplateCard: View {
     let template: RecipeTemplate
-    var onDelete: (() -> Void)?
+    var onDelete: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: Spacing.md) {
@@ -207,22 +223,8 @@ struct TemplateCard: View {
                     }
                 }
             }
-
-            Spacer()
-
-            // Delete or Chevron
-            if let onDelete = onDelete {
-                Button(action: onDelete) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 14))
-                        .foregroundColor(.stoneGray.opacity(0.6))
-                }
-            } else {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.stoneGray.opacity(0.4))
-            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .warmCard(elevated: false)
     }

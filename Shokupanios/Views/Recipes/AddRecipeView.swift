@@ -25,6 +25,14 @@ struct AddRecipeView: View {
         }
     }
 
+    private func formatWeight(_ grams: Double) -> String {
+        if grams == grams.rounded() {
+            return "\(Int(grams))g"
+        } else {
+            return String(format: "%.1fg", grams)
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -190,7 +198,7 @@ struct AddRecipeView: View {
                                         Spacer()
 
                                         VStack(alignment: .trailing, spacing: 2) {
-                                            Text("\(Int((totalFlourGrams * ingredient.percentage).rounded()))g")
+                                            Text(formatWeight(totalFlourGrams * ingredient.percentage))
                                                 .font(.bakeryMono(15))
                                                 .foregroundColor(.inkBrown)
 
