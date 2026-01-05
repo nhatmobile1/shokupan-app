@@ -9,6 +9,8 @@ struct TemplateDetailView: View {
     @State private var showingCloneAlert = false
     @State private var cloneName = ""
     @State private var showingCreateRecipe = false
+    @State private var showingEditInstructions = false
+    @State private var editingInstructions = ""
 
     var body: some View {
         ZStack {
@@ -28,6 +30,9 @@ struct TemplateDetailView: View {
                     if !template.descriptionText.isEmpty {
                         descriptionSection
                     }
+
+                    // Instructions
+                    instructionsSection
 
                     // Ingredients
                     ingredientsSection
@@ -77,7 +82,63 @@ struct TemplateDetailView: View {
         } message: {
             Text("Enter a name for the cloned template")
         }
+        .sheet(isPresented: $showingEditInstructions) {
+            editInstructionsSheet
+        }
         .tint(.terracotta)
+    }
+
+    // MARK: - Edit Instructions Sheet
+
+    private var editInstructionsSheet: some View {
+        NavigationStack {
+            ZStack {
+                Color.panCream.ignoresSafeArea()
+
+                VStack(spacing: 0) {
+                    ZStack(alignment: .topLeading) {
+                        TextEditor(text: $editingInstructions)
+                            .font(.bakeryBody(15))
+                            .foregroundColor(.inkBrown)
+                            .scrollContentBackground(.hidden)
+                            .padding(Spacing.md)
+
+                        if editingInstructions.isEmpty {
+                            Text("Write step-by-step instructions...\n\n1. Mix dry ingredients\n2. Add wet ingredients\n3. Knead until smooth\n4. Bulk fermentation\n5. Shape and proof\n6. Bake")
+                                .font(.bakeryBody(15))
+                                .foregroundColor(.stoneGray.opacity(0.6))
+                                .padding(Spacing.md)
+                                .padding(.top, 8)
+                                .padding(.leading, 4)
+                                .allowsHitTesting(false)
+                        }
+                    }
+                    .background(Color.flourWhite)
+                    .cornerRadius(CornerRadius.md)
+                    .padding(Spacing.md)
+                }
+            }
+            .navigationTitle("Instructions")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        editingInstructions = template.instructions
+                        showingEditInstructions = false
+                    }
+                    .foregroundColor(.stoneGray)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        template.instructions = editingInstructions
+                        showingEditInstructions = false
+                    }
+                    .font(.bakeryBodyMedium(16))
+                    .foregroundColor(.terracotta)
+                }
+            }
+        }
+        .presentationDetents([.large])
     }
 
     // MARK: - Header Card
@@ -159,6 +220,36 @@ struct TemplateDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.lg)
         .warmCard()
+    }
+
+    // MARK: - Instructions Section
+
+    private var instructionsSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            Text("Instructions")
+                .sectionHeader()
+
+            if template.instructions.isEmpty {
+                Text(template.isBuiltIn ? "No instructions available" : "Tap to add step-by-step instructions...")
+                    .font(.bakeryBody(15))
+                    .foregroundColor(.stoneGray)
+                    .italic()
+            } else {
+                Text(template.instructions)
+                    .font(.bakeryBody(15))
+                    .foregroundColor(.inkBrown)
+                    .lineSpacing(4)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Spacing.lg)
+        .warmCard()
+        .onTapGesture {
+            if !template.isBuiltIn {
+                editingInstructions = template.instructions
+                showingEditInstructions = true
+            }
+        }
     }
 
     // MARK: - Ingredients Section
@@ -452,6 +543,7 @@ struct CreateRecipeFromTemplateView: View {
         let recipe = Recipe(
             name: recipeName,
             totalFlourGrams: totalFlour,
+            instructions: template.instructions,
             notes: "",
             tags: []
         )

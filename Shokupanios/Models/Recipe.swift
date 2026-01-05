@@ -7,17 +7,19 @@ class Recipe {
     var totalFlourGrams: Double
     var createdDate: Date
     var lastModifiedDate: Date
+    var instructions: String
     var notes: String
     var rating: Int?
     @Attribute(.externalStorage) var photoData: Data?
     var tags: [String]
     @Relationship(deleteRule: .cascade) var ingredients: [Ingredient]
 
-    init(name: String, totalFlourGrams: Double = 250.0, notes: String = "", rating: Int? = nil, tags: [String] = []) {
+    init(name: String, totalFlourGrams: Double = 250.0, instructions: String = "", notes: String = "", rating: Int? = nil, tags: [String] = []) {
         self.name = name
         self.totalFlourGrams = totalFlourGrams
         self.createdDate = Date()
         self.lastModifiedDate = Date()
+        self.instructions = instructions
         self.notes = notes
         self.rating = rating
         self.photoData = nil
@@ -58,6 +60,7 @@ class Recipe {
         let cloned = Recipe(
             name: newName,
             totalFlourGrams: totalFlourGrams,
+            instructions: instructions,
             notes: notes,
             rating: rating,
             tags: tags

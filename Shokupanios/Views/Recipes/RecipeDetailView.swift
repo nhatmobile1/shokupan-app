@@ -18,6 +18,10 @@ struct RecipeDetailView: View {
     @State private var showingPhotoOptions = false
     @State private var showingCamera = false
     @State private var showingPhotoPicker = false
+    @State private var showingEditInstructions = false
+    @State private var showingEditNotes = false
+    @State private var editingInstructions = ""
+    @State private var editingNotes = ""
 
     // Global settings
     @AppStorage("useMetricUnits") private var useMetricUnits = true
@@ -55,10 +59,11 @@ struct RecipeDetailView: View {
                         // Ingredients
                         ingredientsSection
 
+                        // Instructions
+                        instructionsSection
+
                         // Notes
-                        if !recipe.notes.isEmpty {
-                            notesSection
-                        }
+                        notesSection
                     }
                     .padding(.horizontal, Spacing.md)
                 }
@@ -141,7 +146,93 @@ struct RecipeDetailView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showingEditInstructions) {
+            editTextSheet(
+                title: "Instructions",
+                placeholder: "Write step-by-step instructions for making this bread...\n\n1. Mix dry ingredients\n2. Add wet ingredients\n3. Knead until smooth\n4. Bulk fermentation\n5. Shape and proof\n6. Bake",
+                text: $editingInstructions
+            ) {
+                recipe.instructions = editingInstructions
+                recipe.lastModifiedDate = Date()
+            }
+        }
+        .sheet(isPresented: $showingEditNotes) {
+            editTextSheet(
+                title: "Notes",
+                placeholder: "Record your results, experiments, or anything you want to remember...\n\n• What worked well\n• What to change next time\n• Temperature and timing notes",
+                text: $editingNotes
+            ) {
+                recipe.notes = editingNotes
+                recipe.lastModifiedDate = Date()
+            }
+        }
+        .onAppear {
+            editingInstructions = recipe.instructions
+            editingNotes = recipe.notes
+        }
         .tint(.terracotta)
+    }
+
+    // MARK: - Edit Text Sheet
+
+    private func editTextSheet(title: String, placeholder: String, text: Binding<String>, onSave: @escaping () -> Void) -> some View {
+        NavigationStack {
+            ZStack {
+                Color.panCream.ignoresSafeArea()
+
+                VStack(spacing: 0) {
+                    ZStack(alignment: .topLeading) {
+                        TextEditor(text: text)
+                            .font(.bakeryBody(15))
+                            .foregroundColor(.inkBrown)
+                            .scrollContentBackground(.hidden)
+                            .padding(Spacing.md)
+
+                        if text.wrappedValue.isEmpty {
+                            Text(placeholder)
+                                .font(.bakeryBody(15))
+                                .foregroundColor(.stoneGray.opacity(0.6))
+                                .padding(Spacing.md)
+                                .padding(.top, 8)
+                                .padding(.leading, 4)
+                                .allowsHitTesting(false)
+                        }
+                    }
+                    .background(Color.flourWhite)
+                    .cornerRadius(CornerRadius.md)
+                    .padding(Spacing.md)
+                }
+            }
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        if title == "Instructions" {
+                            editingInstructions = recipe.instructions
+                            showingEditInstructions = false
+                        } else {
+                            editingNotes = recipe.notes
+                            showingEditNotes = false
+                        }
+                    }
+                    .foregroundColor(.stoneGray)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave()
+                        if title == "Instructions" {
+                            showingEditInstructions = false
+                        } else {
+                            showingEditNotes = false
+                        }
+                    }
+                    .font(.bakeryBodyMedium(16))
+                    .foregroundColor(.terracotta)
+                }
+            }
+        }
+        .presentationDetents([.large])
     }
 
     // MARK: - Hero Image Section
@@ -346,6 +437,33 @@ struct RecipeDetailView: View {
         .warmCard()
     }
 
+    // MARK: - Instructions Section
+
+    private var instructionsSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            Text("Instructions")
+                .sectionHeader()
+
+            if recipe.instructions.isEmpty {
+                Text("Tap to add step-by-step instructions...")
+                    .font(.bakeryBody(15))
+                    .foregroundColor(.stoneGray)
+                    .italic()
+            } else {
+                Text(recipe.instructions)
+                    .font(.bakeryBody(15))
+                    .foregroundColor(.inkBrown)
+                    .lineSpacing(4)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Spacing.lg)
+        .warmCard()
+        .onTapGesture {
+            showingEditInstructions = true
+        }
+    }
+
     // MARK: - Notes Section
 
     private var notesSection: some View {
@@ -353,14 +471,24 @@ struct RecipeDetailView: View {
             Text("Notes")
                 .sectionHeader()
 
-            Text(recipe.notes)
-                .font(.bakeryBody(15))
-                .foregroundColor(.inkBrown)
-                .lineSpacing(4)
+            if recipe.notes.isEmpty {
+                Text("Tap to add notes, results, or experiments...")
+                    .font(.bakeryBody(15))
+                    .foregroundColor(.stoneGray)
+                    .italic()
+            } else {
+                Text(recipe.notes)
+                    .font(.bakeryBody(15))
+                    .foregroundColor(.inkBrown)
+                    .lineSpacing(4)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.lg)
         .warmCard()
+        .onTapGesture {
+            showingEditNotes = true
+        }
     }
 
     // MARK: - Scale Sheet

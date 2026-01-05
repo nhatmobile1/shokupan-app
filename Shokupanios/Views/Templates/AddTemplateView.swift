@@ -7,6 +7,7 @@ struct AddTemplateView: View {
 
     @State private var name = ""
     @State private var descriptionText = ""
+    @State private var instructions = ""
 
     var body: some View {
         NavigationStack {
@@ -37,7 +38,7 @@ struct AddTemplateView: View {
                             Text("Description")
                                 .sectionHeader()
 
-                            TextField("Optional description", text: $descriptionText)
+                            TextField("Optional short description", text: $descriptionText)
                                 .font(.bakeryBody(16))
                                 .foregroundColor(.inkBrown)
                                 .padding(Spacing.md)
@@ -45,6 +46,37 @@ struct AddTemplateView: View {
                                     RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
                                         .fill(Color.flourWhite)
                                 )
+                        }
+                        .padding(Spacing.lg)
+                        .warmCard()
+
+                        // Instructions
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            Text("Instructions")
+                                .sectionHeader()
+
+                            ZStack(alignment: .topLeading) {
+                                TextEditor(text: $instructions)
+                                    .font(.bakeryBody(15))
+                                    .foregroundColor(.inkBrown)
+                                    .frame(minHeight: 120)
+                                    .padding(Spacing.sm)
+                                    .scrollContentBackground(.hidden)
+
+                                if instructions.isEmpty {
+                                    Text("Step-by-step instructions (optional)...")
+                                        .font(.bakeryBody(15))
+                                        .foregroundColor(.stoneGray.opacity(0.6))
+                                        .padding(Spacing.sm)
+                                        .padding(.top, 8)
+                                        .padding(.leading, 4)
+                                        .allowsHitTesting(false)
+                                }
+                            }
+                            .background(
+                                RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                                    .fill(Color.flourWhite)
+                            )
                         }
                         .padding(Spacing.lg)
                         .warmCard()
@@ -89,7 +121,7 @@ struct AddTemplateView: View {
     }
 
     private func saveTemplate() {
-        let newTemplate = RecipeTemplate(name: name, descriptionText: descriptionText, isBuiltIn: false)
+        let newTemplate = RecipeTemplate(name: name, descriptionText: descriptionText, instructions: instructions, isBuiltIn: false)
         modelContext.insert(newTemplate)
         dismiss()
     }

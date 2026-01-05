@@ -8,6 +8,7 @@ struct AddRecipeView: View {
 
     @State private var name = ""
     @State private var totalFlourGrams = 250.0
+    @State private var instructions = ""
     @State private var notes = ""
     @State private var selectedTemplate: RecipeTemplate?
     @State private var showingTemplatePicker = false
@@ -218,21 +219,64 @@ struct AddRecipeView: View {
                             .warmCard()
                         }
 
+                        // Instructions
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            Text("Instructions")
+                                .sectionHeader()
+
+                            ZStack(alignment: .topLeading) {
+                                TextEditor(text: $instructions)
+                                    .font(.bakeryBody(15))
+                                    .foregroundColor(.inkBrown)
+                                    .frame(minHeight: 120)
+                                    .padding(Spacing.sm)
+                                    .scrollContentBackground(.hidden)
+
+                                if instructions.isEmpty {
+                                    Text("Step-by-step instructions...")
+                                        .font(.bakeryBody(15))
+                                        .foregroundColor(.stoneGray.opacity(0.6))
+                                        .padding(Spacing.sm)
+                                        .padding(.top, 8)
+                                        .padding(.leading, 4)
+                                        .allowsHitTesting(false)
+                                }
+                            }
+                            .background(
+                                RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                                    .fill(Color.flourWhite)
+                            )
+                        }
+                        .padding(Spacing.lg)
+                        .warmCard()
+
                         // Notes
                         VStack(alignment: .leading, spacing: Spacing.md) {
                             Text("Notes")
                                 .sectionHeader()
 
-                            TextEditor(text: $notes)
-                                .font(.bakeryBody(15))
-                                .foregroundColor(.inkBrown)
-                                .frame(minHeight: 100)
-                                .padding(Spacing.sm)
-                                .scrollContentBackground(.hidden)
-                                .background(
-                                    RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
-                                        .fill(Color.flourWhite)
-                                )
+                            ZStack(alignment: .topLeading) {
+                                TextEditor(text: $notes)
+                                    .font(.bakeryBody(15))
+                                    .foregroundColor(.inkBrown)
+                                    .frame(minHeight: 100)
+                                    .padding(Spacing.sm)
+                                    .scrollContentBackground(.hidden)
+
+                                if notes.isEmpty {
+                                    Text("Results, experiments, observations...")
+                                        .font(.bakeryBody(15))
+                                        .foregroundColor(.stoneGray.opacity(0.6))
+                                        .padding(Spacing.sm)
+                                        .padding(.top, 8)
+                                        .padding(.leading, 4)
+                                        .allowsHitTesting(false)
+                                }
+                            }
+                            .background(
+                                RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                                    .fill(Color.flourWhite)
+                            )
                         }
                         .padding(Spacing.lg)
                         .warmCard()
@@ -265,7 +309,10 @@ struct AddRecipeView: View {
     }
 
     private func saveRecipe() {
-        let newRecipe = Recipe(name: name, totalFlourGrams: totalFlourGrams, notes: notes)
+        // Use template instructions if user hasn't written their own
+        let finalInstructions = instructions.isEmpty ? (selectedTemplate?.instructions ?? "") : instructions
+
+        let newRecipe = Recipe(name: name, totalFlourGrams: totalFlourGrams, instructions: finalInstructions, notes: notes)
 
         // Copy ingredients from template if selected
         if let template = selectedTemplate {

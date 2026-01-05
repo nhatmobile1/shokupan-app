@@ -5,13 +5,15 @@ import SwiftData
 class RecipeTemplate {
     var name: String
     var descriptionText: String
+    var instructions: String
     var isBuiltIn: Bool
     var createdDate: Date
     @Relationship(deleteRule: .cascade) var ingredients: [TemplateIngredient]
 
-    init(name: String, descriptionText: String = "", isBuiltIn: Bool = false) {
+    init(name: String, descriptionText: String = "", instructions: String = "", isBuiltIn: Bool = false) {
         self.name = name
         self.descriptionText = descriptionText
+        self.instructions = instructions
         self.isBuiltIn = isBuiltIn
         self.createdDate = Date()
         self.ingredients = []
@@ -22,6 +24,7 @@ class RecipeTemplate {
         let cloned = RecipeTemplate(
             name: newName,
             descriptionText: descriptionText,
+            instructions: instructions,
             isBuiltIn: false
         )
         for ingredient in ingredients {
