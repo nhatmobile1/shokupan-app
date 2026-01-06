@@ -270,7 +270,7 @@ struct HydrationIndicator: View {
                 .font(.system(size: 10))
                 .foregroundColor(.terracotta.opacity(0.7))
             Text("\(percentage)%")
-                .font(.bakeryMonoCaption)
+                .font(.bakeryMono(11))
                 .foregroundColor(.warmBrown)
         }
         .padding(.horizontal, Spacing.sm)
@@ -293,7 +293,7 @@ struct FlourWeightBadge: View {
                 .font(.system(size: 10))
                 .foregroundColor(.crustBrown.opacity(0.7))
             Text(weight)
-                .font(.bakeryMonoCaption)
+                .font(.bakeryMono(11))
                 .foregroundColor(.warmBrown)
         }
         .padding(.horizontal, Spacing.sm)
@@ -319,7 +319,7 @@ struct SectionBadge: View {
 
     var body: some View {
         Text(section.rawValue)
-            .font(.bakeryCaption)
+            .font(.bakeryBody(11))
             .foregroundColor(color)
             .padding(.horizontal, Spacing.sm)
             .padding(.vertical, Spacing.xs)
@@ -343,29 +343,27 @@ struct ColoredTagChip: View {
     var body: some View {
         HStack(spacing: 4) {
             Text(tag)
-                .font(.bakeryCaption)
+                .font(.bakeryBody(12))
                 .foregroundColor(.flourWhite)
 
             if showDelete, let onDelete = onDelete {
                 Button(action: onDelete) {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 16))
+                        .font(.system(size: 14))
                         .foregroundColor(.flourWhite.opacity(0.9))
                 }
                 .buttonStyle(.plain)
-                // Ensure minimum 44pt touch target
-                .frame(minWidth: 44, minHeight: 44)
-                .contentShape(Rectangle())
                 .accessibilityLabel("Remove \(tag) tag")
             }
         }
-        .padding(.leading, Spacing.sm + 2)
-        .padding(.trailing, showDelete ? 0 : Spacing.sm + 2)
+        .padding(.horizontal, Spacing.sm + 2)
         .padding(.vertical, Spacing.xs + 2)
         .background(
             Capsule()
                 .fill(tagColor)
         )
+        // Extend touch target beyond visual bounds for accessibility
+        .contentShape(Capsule().inset(by: -8))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(showDelete ? "\(tag) tag, removable" : "\(tag) tag")
     }
