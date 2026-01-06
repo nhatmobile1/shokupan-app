@@ -274,6 +274,9 @@ struct RecipeDetailView: View {
                             .shadow(color: Color.warmBrown.opacity(0.3), radius: 8, x: 0, y: 4)
                     )
             }
+            // Ensure 44pt minimum touch target
+            .frame(minWidth: 44, minHeight: 44)
+            .accessibilityLabel(recipe.photoData != nil ? "Change photo" : "Add photo")
             .padding(Spacing.md)
         }
     }
@@ -440,54 +443,32 @@ struct RecipeDetailView: View {
     // MARK: - Instructions Section
 
     private var instructionsSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            Text("Instructions")
-                .sectionHeader()
-
-            if recipe.instructions.isEmpty {
-                Text("Tap to add step-by-step instructions...")
-                    .font(.bakeryBody(15))
-                    .foregroundColor(.stoneGray)
-                    .italic()
-            } else {
-                Text(recipe.instructions)
-                    .font(.bakeryBody(15))
-                    .foregroundColor(.inkBrown)
-                    .lineSpacing(4)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Spacing.lg)
-        .warmCard()
-        .onTapGesture {
-            showingEditInstructions = true
+        EditableCardSection(
+            title: "Instructions",
+            isEmpty: recipe.instructions.isEmpty,
+            emptyText: "Tap to add step-by-step instructions...",
+            onTap: { showingEditInstructions = true }
+        ) {
+            Text(recipe.instructions)
+                .font(.bakeryBodyDynamic)
+                .foregroundColor(.inkBrown)
+                .lineSpacing(4)
         }
     }
 
     // MARK: - Notes Section
 
     private var notesSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            Text("Notes")
-                .sectionHeader()
-
-            if recipe.notes.isEmpty {
-                Text("Tap to add notes, results, or experiments...")
-                    .font(.bakeryBody(15))
-                    .foregroundColor(.stoneGray)
-                    .italic()
-            } else {
-                Text(recipe.notes)
-                    .font(.bakeryBody(15))
-                    .foregroundColor(.inkBrown)
-                    .lineSpacing(4)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Spacing.lg)
-        .warmCard()
-        .onTapGesture {
-            showingEditNotes = true
+        EditableCardSection(
+            title: "Notes",
+            isEmpty: recipe.notes.isEmpty,
+            emptyText: "Tap to add notes, results, or experiments...",
+            onTap: { showingEditNotes = true }
+        ) {
+            Text(recipe.notes)
+                .font(.bakeryBodyDynamic)
+                .foregroundColor(.inkBrown)
+                .lineSpacing(4)
         }
     }
 

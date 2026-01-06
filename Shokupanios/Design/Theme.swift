@@ -2,30 +2,47 @@ import SwiftUI
 
 // MARK: - Shokupan Design System
 // A wabi-sabi inspired theme: warm, minimal, and serene
+// Supports Dynamic Type, Dark Mode, and Accessibility
 
-// MARK: - Color Palette
+// MARK: - Color Palette (Adaptive for Light/Dark Mode)
 extension Color {
-    // Primary backgrounds - warm cream tones
-    static let panCream = Color(red: 0.98, green: 0.96, blue: 0.92)
-    static let panCrumb = Color(red: 0.95, green: 0.92, blue: 0.86)
+    // Primary backgrounds - warm cream tones (light) / dark browns (dark)
+    static let panCream = Color("PanCream", bundle: nil, defaultLight: Color(red: 0.98, green: 0.96, blue: 0.92), defaultDark: Color(red: 0.12, green: 0.11, blue: 0.10))
+    static let panCrumb = Color("PanCrumb", bundle: nil, defaultLight: Color(red: 0.95, green: 0.92, blue: 0.86), defaultDark: Color(red: 0.18, green: 0.16, blue: 0.14))
 
     // Accent - terracotta and warm browns
-    static let crustBrown = Color(red: 0.76, green: 0.60, blue: 0.42)
-    static let terracotta = Color(red: 0.80, green: 0.52, blue: 0.40)
-    static let warmBrown = Color(red: 0.45, green: 0.35, blue: 0.28)
+    static let crustBrown = Color("CrustBrown", bundle: nil, defaultLight: Color(red: 0.76, green: 0.60, blue: 0.42), defaultDark: Color(red: 0.82, green: 0.66, blue: 0.48))
+    static let terracotta = Color("Terracotta", bundle: nil, defaultLight: Color(red: 0.80, green: 0.52, blue: 0.40), defaultDark: Color(red: 0.88, green: 0.58, blue: 0.46))
+    static let warmBrown = Color("WarmBrown", bundle: nil, defaultLight: Color(red: 0.45, green: 0.35, blue: 0.28), defaultDark: Color(red: 0.75, green: 0.68, blue: 0.60))
 
     // Text colors
-    static let inkBrown = Color(red: 0.25, green: 0.22, blue: 0.20)
-    static let stoneGray = Color(red: 0.55, green: 0.52, blue: 0.48)
+    static let inkBrown = Color("InkBrown", bundle: nil, defaultLight: Color(red: 0.25, green: 0.22, blue: 0.20), defaultDark: Color(red: 0.92, green: 0.90, blue: 0.88))
+    static let stoneGray = Color("StoneGray", bundle: nil, defaultLight: Color(red: 0.55, green: 0.52, blue: 0.48), defaultDark: Color(red: 0.62, green: 0.60, blue: 0.56))
 
     // Supporting colors
-    static let flourWhite = Color(red: 1.0, green: 0.99, blue: 0.97)
-    static let yeastGold = Color(red: 0.85, green: 0.72, blue: 0.45)
-    static let steamWhite = Color(red: 0.98, green: 0.97, blue: 0.95).opacity(0.9)
+    static let flourWhite = Color("FlourWhite", bundle: nil, defaultLight: Color(red: 1.0, green: 0.99, blue: 0.97), defaultDark: Color(red: 0.15, green: 0.14, blue: 0.13))
+    static let yeastGold = Color("YeastGold", bundle: nil, defaultLight: Color(red: 0.85, green: 0.72, blue: 0.45), defaultDark: Color(red: 0.90, green: 0.78, blue: 0.50))
+    static let steamWhite = Color("SteamWhite", bundle: nil, defaultLight: Color(red: 0.98, green: 0.97, blue: 0.95).opacity(0.9), defaultDark: Color(red: 0.20, green: 0.19, blue: 0.18).opacity(0.9))
 
     // Semantic colors
-    static let prefermentColor = Color(red: 0.72, green: 0.65, blue: 0.55)
-    static let finalDoughColor = Color(red: 0.80, green: 0.52, blue: 0.40)
+    static let prefermentColor = Color("PrefermentColor", bundle: nil, defaultLight: Color(red: 0.72, green: 0.65, blue: 0.55), defaultDark: Color(red: 0.78, green: 0.72, blue: 0.62))
+    static let finalDoughColor = Color("FinalDoughColor", bundle: nil, defaultLight: Color(red: 0.80, green: 0.52, blue: 0.40), defaultDark: Color(red: 0.88, green: 0.58, blue: 0.46))
+
+    /// Helper initializer for adaptive colors with fallbacks
+    /// Uses asset catalog color if available, otherwise falls back to programmatic colors
+    init(_ name: String, bundle: Bundle?, defaultLight: Color, defaultDark: Color) {
+        // Try to load from asset catalog first
+        if let _ = UIColor(named: name, in: bundle, compatibleWith: nil) {
+            self.init(name, bundle: bundle)
+        } else {
+            // Fallback to programmatic adaptive color
+            self.init(uiColor: UIColor { traitCollection in
+                traitCollection.userInterfaceStyle == .dark
+                    ? UIColor(defaultDark)
+                    : UIColor(defaultLight)
+            })
+        }
+    }
 
     // Tag colors - Studio Ghibli inspired palette
     static let tagColors: [Color] = [
@@ -50,9 +67,10 @@ extension Color {
     }
 }
 
-// MARK: - Typography
+// MARK: - Typography (Dynamic Type Support)
 extension Font {
     // Display fonts - for titles and headers
+    // Uses semantic text styles for Dynamic Type scaling
     static func bakerySerif(_ size: CGFloat) -> Font {
         .system(size: size, weight: .regular, design: .serif)
     }
@@ -73,6 +91,49 @@ extension Font {
     // Monospace for measurements
     static func bakeryMono(_ size: CGFloat) -> Font {
         .system(size: size, weight: .regular, design: .monospaced)
+    }
+
+    // MARK: - Dynamic Type Variants
+    // These variants scale with the user's accessibility text size settings
+
+    /// Large title - scales with .largeTitle
+    static var bakeryLargeTitle: Font {
+        .system(.largeTitle, design: .serif, weight: .regular)
+    }
+
+    /// Title - scales with .title2
+    static var bakeryTitle: Font {
+        .system(.title2, design: .serif, weight: .medium)
+    }
+
+    /// Headline - scales with .headline
+    static var bakeryHeadline: Font {
+        .system(.headline, design: .rounded, weight: .semibold)
+    }
+
+    /// Body text - scales with .body
+    static var bakeryBodyDynamic: Font {
+        .system(.body, design: .rounded, weight: .regular)
+    }
+
+    /// Subheadline - scales with .subheadline
+    static var bakerySubheadline: Font {
+        .system(.subheadline, design: .rounded, weight: .regular)
+    }
+
+    /// Caption - scales with .caption
+    static var bakeryCaption: Font {
+        .system(.caption, design: .rounded, weight: .regular)
+    }
+
+    /// Monospace body - scales with .body
+    static var bakeryMonoDynamic: Font {
+        .system(.body, design: .monospaced, weight: .regular)
+    }
+
+    /// Monospace caption - scales with .caption
+    static var bakeryMonoCaption: Font {
+        .system(.caption, design: .monospaced, weight: .regular)
     }
 }
 
@@ -209,7 +270,7 @@ struct HydrationIndicator: View {
                 .font(.system(size: 10))
                 .foregroundColor(.terracotta.opacity(0.7))
             Text("\(percentage)%")
-                .font(.bakeryMono(13))
+                .font(.bakeryMonoCaption)
                 .foregroundColor(.warmBrown)
         }
         .padding(.horizontal, Spacing.sm)
@@ -218,6 +279,8 @@ struct HydrationIndicator: View {
             Capsule()
                 .fill(Color.terracotta.opacity(0.12))
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Hydration \(percentage) percent")
     }
 }
 
@@ -230,7 +293,7 @@ struct FlourWeightBadge: View {
                 .font(.system(size: 10))
                 .foregroundColor(.crustBrown.opacity(0.7))
             Text(weight)
-                .font(.bakeryMono(13))
+                .font(.bakeryMonoCaption)
                 .foregroundColor(.warmBrown)
         }
         .padding(.horizontal, Spacing.sm)
@@ -239,6 +302,8 @@ struct FlourWeightBadge: View {
             Capsule()
                 .fill(Color.crustBrown.opacity(0.12))
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Flour weight \(weight)")
     }
 }
 
@@ -254,7 +319,7 @@ struct SectionBadge: View {
 
     var body: some View {
         Text(section.rawValue)
-            .font(.bakeryBody(11))
+            .font(.bakeryCaption)
             .foregroundColor(color)
             .padding(.horizontal, Spacing.sm)
             .padding(.vertical, Spacing.xs)
@@ -262,6 +327,7 @@ struct SectionBadge: View {
                 Capsule()
                     .stroke(color.opacity(0.4), lineWidth: 1)
             )
+            .accessibilityLabel("\(section.rawValue) section")
     }
 }
 
@@ -277,23 +343,31 @@ struct ColoredTagChip: View {
     var body: some View {
         HStack(spacing: 4) {
             Text(tag)
-                .font(.bakeryBody(12))
+                .font(.bakeryCaption)
                 .foregroundColor(.flourWhite)
 
             if showDelete, let onDelete = onDelete {
                 Button(action: onDelete) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundColor(.flourWhite.opacity(0.8))
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.flourWhite.opacity(0.9))
                 }
+                .buttonStyle(.plain)
+                // Ensure minimum 44pt touch target
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Rectangle())
+                .accessibilityLabel("Remove \(tag) tag")
             }
         }
-        .padding(.horizontal, Spacing.sm + 2)
+        .padding(.leading, Spacing.sm + 2)
+        .padding(.trailing, showDelete ? 0 : Spacing.sm + 2)
         .padding(.vertical, Spacing.xs + 2)
         .background(
             Capsule()
                 .fill(tagColor)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(showDelete ? "\(tag) tag, removable" : "\(tag) tag")
     }
 }
 
@@ -331,14 +405,15 @@ struct EmptyStateView: View {
             Image(systemName: icon)
                 .font(.system(size: 48, weight: .light))
                 .foregroundColor(.crustBrown.opacity(0.5))
+                .accessibilityHidden(true)
 
             VStack(spacing: Spacing.sm) {
                 Text(title)
-                    .font(.bakerySerifMedium(20))
+                    .font(.bakeryTitle)
                     .foregroundColor(.inkBrown)
 
                 Text(message)
-                    .font(.bakeryBody(15))
+                    .font(.bakeryBodyDynamic)
                     .foregroundColor(.stoneGray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, Spacing.xl)
@@ -354,6 +429,56 @@ struct EmptyStateView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.panCream)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Editable Card Section (with tap-to-edit affordance)
+
+/// A card section that provides visual hints that it's editable
+struct EditableCardSection<Content: View>: View {
+    let title: String
+    var isEmpty: Bool = false
+    var emptyText: String = "Tap to add..."
+    var isEditable: Bool = true
+    let onTap: () -> Void
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                HStack {
+                    Text(title)
+                        .sectionHeader()
+
+                    Spacer()
+
+                    if isEditable {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 12))
+                            .foregroundColor(.stoneGray.opacity(0.6))
+                    }
+                }
+
+                if isEmpty {
+                    Text(emptyText)
+                        .font(.bakeryBodyDynamic)
+                        .foregroundColor(.stoneGray)
+                        .italic()
+                } else {
+                    content()
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(Spacing.lg)
+            .warmCard()
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEditable)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(isEmpty ? "\(title), empty" : title)
+        .accessibilityHint(isEditable ? "Double tap to edit" : "")
+        .accessibilityAddTraits(isEditable ? .isButton : [])
     }
 }
 

@@ -225,30 +225,20 @@ struct TemplateDetailView: View {
     // MARK: - Instructions Section
 
     private var instructionsSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            Text("Instructions")
-                .sectionHeader()
-
-            if template.instructions.isEmpty {
-                Text(template.isBuiltIn ? "No instructions available" : "Tap to add step-by-step instructions...")
-                    .font(.bakeryBody(15))
-                    .foregroundColor(.stoneGray)
-                    .italic()
-            } else {
-                Text(template.instructions)
-                    .font(.bakeryBody(15))
-                    .foregroundColor(.inkBrown)
-                    .lineSpacing(4)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Spacing.lg)
-        .warmCard()
-        .onTapGesture {
-            if !template.isBuiltIn {
+        EditableCardSection(
+            title: "Instructions",
+            isEmpty: template.instructions.isEmpty,
+            emptyText: template.isBuiltIn ? "No instructions available" : "Tap to add step-by-step instructions...",
+            isEditable: !template.isBuiltIn,
+            onTap: {
                 editingInstructions = template.instructions
                 showingEditInstructions = true
             }
+        ) {
+            Text(template.instructions)
+                .font(.bakeryBodyDynamic)
+                .foregroundColor(.inkBrown)
+                .lineSpacing(4)
         }
     }
 
