@@ -4,9 +4,9 @@ struct SettingsView: View {
     // User preferences stored in UserDefaults
     @AppStorage("useMetricUnits") private var useMetricUnits = true
     @AppStorage("appTheme") private var appTheme = AppTheme.system.rawValue
-    @AppStorage("panSize1Kin") private var panSize1Kin = 250.0
-    @AppStorage("panSize1_5Kin") private var panSize1_5Kin = 375.0
-    @AppStorage("panSize2Kin") private var panSize2Kin = 500.0
+    @AppStorage("panSize1Kin") private var panSize1Kin = 265.0
+    @AppStorage("panSize1_5Kin") private var panSize1_5Kin = 398.0
+    @AppStorage("panSize2Kin") private var panSize2Kin = 530.0
 
     var body: some View {
         NavigationStack {
@@ -102,9 +102,9 @@ struct SettingsView: View {
 
                                 Button {
                                     withAnimation(.easeOut(duration: 0.2)) {
-                                        panSize1Kin = 250.0
-                                        panSize1_5Kin = 375.0
-                                        panSize2Kin = 500.0
+                                        panSize1Kin = 265.0
+                                        panSize1_5Kin = 398.0
+                                        panSize2Kin = 530.0
                                     }
                                 } label: {
                                     HStack {
