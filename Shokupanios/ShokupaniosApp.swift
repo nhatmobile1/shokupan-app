@@ -14,6 +14,15 @@ struct ShokupaniosApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [Recipe.self, Ingredient.self, RecipeTemplate.self, TemplateIngredient.self])
+        .modelContainer(for: [
+            Recipe.self,
+            Ingredient.self,
+            RecipeTemplate.self,
+            TemplateIngredient.self,
+            TimerPreset.self,
+            TimerPresetStep.self,
+            BakeTimer.self,
+            BakeTimerStep.self
+        ])
     }
 }

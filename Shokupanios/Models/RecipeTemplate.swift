@@ -88,25 +88,32 @@ class TemplateIngredient {
 // MARK: - Default Templates
 struct DefaultTemplates {
     // Increment this version number when built-in templates need to be refreshed
-    private static let currentVersion = 4
+    private static let currentVersion = 5  // Updated Shokupan to Just One Cookbook recipe
     private static let versionKey = "builtInTemplatesVersion"
 
     // MARK: - Instructions (from King Arthur Baking)
 
     private static let shokupanInstructions = """
-1. Make the tangzhong: Combine flour and water in a small saucepan, whisk until no lumps remain. Cook over low heat, stirring constantly, until thickened (3-5 minutes). Transfer to a bowl and cool to lukewarm.
+1. Prepare ingredients: Warm water to 104°F (40°C). Have butter at room temperature.
 
-2. Mix the dough: Combine the cooled tangzhong with all remaining ingredients except butter. Mix and knead until smooth and elastic, about 15 minutes in a stand mixer. Add butter and knead until incorporated.
+2. Mix wet ingredients: In a stand mixer bowl, combine warm water, sugar, salt, and honey. Sprinkle yeast over top and let sit 2 minutes.
 
-3. First rise: Place dough in a greased bowl, cover, and let rise for 1 to 1½ hours until puffy.
+3. Add dry ingredients: Add bread flour and milk powder. Mix at Speed 2 for 2 minutes, then Speed 4 for 4 minutes until dough comes together.
 
-4. Shape: Divide dough into four equal pieces. Flatten each into a 5"×8" rectangle, fold short ends together like a letter, then flatten again to 3"×6". Roll each into a 4" log. Place logs in a row, seam side down, in a greased 9"×5" loaf pan.
+4. Add butter: Add room temperature butter. Mix at Speed 2 until incorporated, then Speed 4 for 4 minutes, finishing with Speed 6 for 3 minutes. Dough should pass the windowpane test.
 
-5. Final rise: Cover and let rise 40-50 minutes until puffy.
+5. First rise: Transfer to a greased bowl, cover, and let rise 40 minutes until dough triples in size.
 
-6. Bake: Preheat oven to 350°F (175°C). Brush loaf with milk. Bake 30-35 minutes until golden brown and internal temperature reaches 190°F (88°C).
+6. Shape: Divide into 3 equal pieces. Form into balls and rest 15 minutes. Roll each into a rectangle, fold in thirds lengthwise, then roll up tightly.
 
-7. Cool in pan 10 minutes before transferring to a rack.
+7. Final proof: Place rolls seam-side down in a greased 9"×5" loaf pan. Cover and let rise 1 hour until dough reaches 75-80% of pan height (flat-top) or 85-90% (round-top).
+
+8. Bake:
+   • Flat-topped: 415°F (210°C) for 25-30 minutes
+   • Round-topped: 385°F (195°C) for 30 minutes
+   Internal temperature should reach 190°F (88°C).
+
+9. Cool in pan 10 minutes, then transfer to a wire rack.
 """
 
     private static let sourdoughInstructions = """
@@ -217,24 +224,23 @@ struct DefaultTemplates {
 
         guard existingCount == 0 else { return }
 
-        // Shokupan (Japanese Milk Bread)
+        // Shokupan (Japanese Milk Bread) - based on Just One Cookbook recipe
         let shokupan = RecipeTemplate(
             name: "Shokupan",
-            descriptionText: "Soft Japanese milk bread with tangzhong",
+            descriptionText: "Soft Japanese milk bread",
             instructions: shokupanInstructions,
             isBuiltIn: true
         )
+        // Based on 350g flour = 100%
         shokupan.ingredients = [
-            TemplateIngredient(name: "Flour", percentage: 0.20, section: .preferment),
-            TemplateIngredient(name: "Water", percentage: 0.16, section: .preferment),
-            TemplateIngredient(name: "Flour", percentage: 0.80, section: .finalDough),
-            TemplateIngredient(name: "Water", percentage: 0.54, section: .finalDough),
-            TemplateIngredient(name: "Dry Milk", percentage: 0.06, section: .finalDough),
-            TemplateIngredient(name: "Sugar", percentage: 0.06, section: .finalDough),
-            TemplateIngredient(name: "Honey", percentage: 0.03, section: .finalDough),
-            TemplateIngredient(name: "Salt", percentage: 0.02, section: .finalDough),
-            TemplateIngredient(name: "Unsalted Butter", percentage: 0.06, section: .finalDough),
-            TemplateIngredient(name: "Instant Yeast", percentage: 0.014, section: .finalDough),
+            TemplateIngredient(name: "Bread Flour", percentage: 1.0, section: .finalDough),
+            TemplateIngredient(name: "Water", percentage: 0.714, section: .finalDough),  // 250g / 350g
+            TemplateIngredient(name: "Skim Milk Powder", percentage: 0.057, section: .finalDough),  // 20g / 350g
+            TemplateIngredient(name: "Sugar", percentage: 0.057, section: .finalDough),  // 20g / 350g
+            TemplateIngredient(name: "Honey", percentage: 0.029, section: .finalDough),  // 10g / 350g
+            TemplateIngredient(name: "Salt", percentage: 0.02, section: .finalDough),  // 7g / 350g
+            TemplateIngredient(name: "Unsalted Butter", percentage: 0.071, section: .finalDough),  // 25g / 350g
+            TemplateIngredient(name: "Instant Yeast", percentage: 0.02, section: .finalDough),  // 7g / 350g
         ]
         context.insert(shokupan)
 

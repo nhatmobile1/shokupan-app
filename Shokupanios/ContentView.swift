@@ -60,6 +60,11 @@ struct ContentView: View {
                     Label("Templates", systemImage: "doc.text")
                 }
 
+            TimerListView()
+                .tabItem {
+                    Label("Timers", systemImage: "timer")
+                }
+
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gear")
@@ -74,5 +79,14 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: [Recipe.self, Ingredient.self, RecipeTemplate.self, TemplateIngredient.self], inMemory: true)
+        .modelContainer(for: [
+            Recipe.self,
+            Ingredient.self,
+            RecipeTemplate.self,
+            TemplateIngredient.self,
+            TimerPreset.self,
+            TimerPresetStep.self,
+            BakeTimer.self,
+            BakeTimerStep.self
+        ], inMemory: true)
 }

@@ -175,9 +175,163 @@ Shokupanios/
 | Data models | `Models/Recipe.swift`, `Models/RecipeTemplate.swift` |
 | Design system | `Design/Theme.swift`, `DESIGN_SYSTEM.md` |
 
-### Pending/Future Ideas
-- [ ] Bake timer integration
-- [ ] Recipe scaling calculator
-- [ ] Export/share recipes
-- [ ] Recipe version history
-- [ ] Fermentation temperature calculator
+---
+
+## iOS Development Skill Review (January 2026)
+
+### Overall Assessment: Good
+
+**Strengths:**
+- Clean, consistent code style with proper Swift conventions
+- Proper SwiftData implementation with relationships and external storage
+- Good UI/UX with accessibility features (Dynamic Type, VoiceOver labels)
+- Well-organized file structure
+- Effective use of SwiftUI's declarative patterns
+
+**Areas for Improvement:**
+1. Error handling - Many `try?` statements silently fail
+2. One force unwrap at `RecipeDetailView.swift:602`
+3. No ViewModels - Views handle business logic directly
+4. No unit tests for calculation logic
+5. `RecipeDetailView` is large (~900 lines, 25 @State properties)
+
+**Recommendations:**
+- Add error alerts when save/delete fails
+- Replace force unwrap with safe alternative
+- Consider ViewModels for testability if app grows
+- Add unit tests for `hydrationPercentage` calculation
+
+---
+
+## Future Phases Roadmap
+
+### Phase 7: Bake Timer & Scheduling
+- Multi-step timers (autolyse → bulk → proof → bake)
+- Background notifications when timers complete
+- Save timer presets per recipe
+- Live Activities for active timers (iOS 16+)
+
+### Phase 8: Enhanced Export & Sharing
+- Export recipe as PDF with formatted layout
+- Export/import recipes as JSON for backup
+- Share to other Shokupan users
+- Print-friendly recipe view
+
+### Phase 9: Fermentation Calculator
+- Desired Dough Temperature (DDT) calculator
+- Proof time estimates based on temperature
+- Friction factor calculator for mixer
+- Yeast conversion (fresh ↔ instant ↔ active dry)
+
+### Phase 10: Recipe History & Bake Log
+- Track modifications to recipes over time
+- "Bake log" - record each bake with results
+- Photo gallery per recipe (multiple bakes)
+- Compare different bakes side-by-side
+
+### Phase 11: Advanced Features
+- Recipe version history with diff view
+- Ingredient inventory tracking
+- Shopping list generation
+- Nutrition information
+
+### Phase 12: Social & Sync
+- iCloud account sign-in
+- Share recipes with friends
+- Import recipes from URLs
+- Community recipe browser
+
+### Quick Wins (Anytime)
+- [ ] Haptic feedback on button taps
+- [ ] Spotlight search integration
+- [ ] Widget for recent recipe or active timer
+- [ ] Siri shortcuts
+- [ ] iPad layout optimization
+- [ ] watchOS companion for timers
+
+---
+
+## Phase 7: Bake Timer & Scheduling
+
+### Overview
+Multi-step timer system for bread baking with background notifications and Live Activities.
+
+### Todo Items
+
+#### 7.1 Data Models
+- [ ] Create `BakeTimer` SwiftData model (name, steps, recipe relationship)
+- [ ] Create `TimerStep` model (name, duration, order, isRunning, startedAt)
+- [ ] Create `TimerPreset` model for reusable timer templates
+- [ ] Add optional `timerPreset` relationship to Recipe
+
+#### 7.2 Timer Service
+- [ ] Create `TimerManager` class (ObservableObject)
+- [ ] Implement background timer with `UNUserNotificationCenter`
+- [ ] Handle app backgrounding/foregrounding
+- [ ] Persist timer state for app restarts
+- [ ] Add haptic feedback on timer completion
+
+#### 7.3 Timer UI - List View
+- [ ] Create `TimerListView` for active/saved timers
+- [ ] Add "Timers" tab to ContentView (4th tab)
+- [ ] Show active timer with countdown
+- [ ] List saved timer presets
+
+#### 7.4 Timer UI - Detail/Running View
+- [ ] Create `TimerDetailView` with step-by-step display
+- [ ] Large countdown display for current step
+- [ ] Progress indicator across all steps
+- [ ] Pause/Resume/Skip/Reset controls
+- [ ] Audio/vibration on step completion
+
+#### 7.5 Timer UI - Create/Edit
+- [ ] Create `AddTimerView` for new timer presets
+- [ ] Add/remove/reorder steps
+- [ ] Duration picker (hours, minutes)
+- [ ] Quick presets (common bread timings)
+
+#### 7.6 Recipe Integration
+- [ ] Add "Start Timer" button to RecipeDetailView
+- [ ] Option to attach timer preset to recipe
+- [ ] Auto-suggest timer based on recipe instructions
+
+#### 7.7 Notifications
+- [ ] Request notification permissions
+- [ ] Schedule local notifications for each step
+- [ ] Custom notification sounds (optional)
+- [ ] Notification actions (Pause, Skip to Next)
+
+#### 7.8 Live Activities (iOS 16+)
+- [ ] Create Live Activity for active timer
+- [ ] Show on Lock Screen and Dynamic Island
+- [ ] Update countdown in real-time
+- [ ] Deep link back to app
+
+### Files to Create
+```
+Shokupanios/
+├── Models/
+│   └── BakeTimer.swift          # Timer, TimerStep, TimerPreset models
+├── Services/
+│   └── TimerManager.swift       # Timer logic and notifications
+├── Views/
+│   └── Timers/
+│       ├── TimerListView.swift
+│       ├── TimerDetailView.swift
+│       ├── AddTimerView.swift
+│       └── TimerStepRow.swift
+└── Widgets/
+    └── TimerLiveActivity.swift  # Live Activity (separate target)
+```
+
+### Default Timer Presets
+- **Quick Proof** - 1 hour bulk, 45 min final proof
+- **Sourdough Day** - 30 min autolyse, 4 hr bulk (with folds), 1 hr proof, 45 min bake
+- **Shokupan** - 1.5 hr bulk, 50 min proof, 35 min bake
+- **Overnight Cold Proof** - 1 hr bulk, 12 hr cold proof, 45 min bake
+
+### Technical Notes
+- Use `TimeInterval` for durations
+- Store `startedAt: Date?` to calculate remaining time on app relaunch
+- Use `BGTaskScheduler` for background refresh if needed
+- Live Activities require a Widget Extension target
