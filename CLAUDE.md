@@ -6,9 +6,10 @@ A SwiftUI iOS app for bread bakers to manage recipes with baker's percentages, t
 
 ## Project Status
 
-- **Phases 1-6 complete** - Core features, templates, UI polish
+- **Phases 1-7 complete** - Core features, templates, UI polish, bake timers
+- **DDT Calculator complete** - Desired dough temperature / water temp calculator
 - **HIG compliant** - Dynamic Type, dark mode, accessibility
-- **Current: Phase 7** - Bake Timer & Scheduling
+- **Next**: Phase 8 (Export/Sharing) or Phase 9 remainder (yeast conversion, proof time)
 
 ## Key Architecture
 
@@ -20,11 +21,13 @@ A SwiftUI iOS app for bread bakers to manage recipes with baker's percentages, t
 
 ```
 Shokupanios/
-├── Models/           # Recipe.swift, RecipeTemplate.swift
+├── Models/           # Recipe.swift, RecipeTemplate.swift, BakeTimer.swift
+├── Services/         # TimerManager.swift
 ├── Views/
-│   ├── Recipes/      # RecipeListView, RecipeDetailView, AddRecipeView
+│   ├── Recipes/      # RecipeListView, RecipeDetailView, AddRecipeView, DDTCalculatorView
 │   ├── Templates/    # TemplateListView, TemplateDetailView
-│   └── Settings/     # SettingsView
+│   ├── Timers/       # TimerListView, TimerDetailView, AddTimerView
+│   └── Settings/     # SettingsView (includes MixingMethod enum)
 ├── Design/           # Theme.swift (colors, fonts, components)
 └── tasks/            # todo.md (changelog & progress)
 ```
@@ -51,11 +54,19 @@ See `claude-rules.md` for workflow:
 - `DESIGN_SYSTEM.md` - Design tokens and components
 - `BREAD_APP_GUIDE.md` - Bread baking domain knowledge
 
+## Key Architecture Details
+
+- **TimerManager**: `@MainActor @Observable` singleton (`TimerManager.shared`)
+- **Recipe-Timer link**: `timerPresetName: String?` on Recipe (name-based, not relationship)
+- **DDT settings**: Stored in AppStorage (`defaultDDT`, `defaultFrictionFactor`, `mixingMethod`)
+- **MixingMethod enum**: Lives in `SettingsView.swift` (Hand, Stand Mixer, Spiral)
+- **Notification actions**: Registered via `UNNotificationCategory` in TimerManager, handled by AppDelegate in `ShokupaniosApp.swift`
+
 ## Future Phases
 
-- **Phase 7 (Current)**: Bake Timer & Scheduling
+- **Phase 7.8 (Deferred)**: Live Activities (requires Widget Extension target)
 - **Phase 8**: Enhanced Export & Sharing (PDF, JSON)
-- **Phase 9**: Fermentation Calculator (DDT, proof times)
+- **Phase 9 (Partial)**: ~~DDT Calculator~~ Done — remaining: yeast conversion, proof time estimates
 - **Phase 10**: Recipe History & Bake Log
 - **Phase 11**: Advanced Features (inventory, shopping list)
 - **Phase 12**: Social & Sync

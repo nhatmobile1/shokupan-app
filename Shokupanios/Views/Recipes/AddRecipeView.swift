@@ -5,13 +5,16 @@ struct AddRecipeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \RecipeTemplate.name) private var templates: [RecipeTemplate]
+    @Query(sort: \TimerPreset.name) private var timerPresets: [TimerPreset]
 
     @State private var name = ""
     @State private var totalFlourGrams = 250.0
     @State private var instructions = ""
     @State private var notes = ""
     @State private var selectedTemplate: RecipeTemplate?
+    @State private var selectedTimerPresetName: String?
     @State private var showingTemplatePicker = false
+    @State private var showingTimerPicker = false
 
     @AppStorage("panSize1Kin") private var panSize1Kin = 250.0
     @AppStorage("panSize1_5Kin") private var panSize1_5Kin = 375.0
@@ -90,6 +93,58 @@ struct AddRecipeView: View {
                                         Image(systemName: "xmark.circle")
                                             .font(.system(size: 12))
                                         Text("Clear Template")
+                                            .font(.bakeryBody(13))
+                                    }
+                                    .foregroundColor(.terracotta)
+                                }
+                            }
+                        }
+                        .padding(Spacing.lg)
+                        .warmCard()
+
+                        // Timer Preset
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            Text("Bake Timer")
+                                .sectionHeader()
+
+                            Button {
+                                showingTimerPicker = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "timer")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.terracotta.opacity(0.8))
+
+                                    Text("Timer")
+                                        .font(.bakeryBody(15))
+                                        .foregroundColor(.inkBrown)
+
+                                    Spacer()
+
+                                    Text(selectedTimerPresetName ?? "None")
+                                        .font(.bakeryBody(14))
+                                        .foregroundColor(.stoneGray)
+
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(.stoneGray)
+                                }
+                                .padding(Spacing.md)
+                                .background(
+                                    RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                                        .fill(Color.flourWhite)
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            if selectedTimerPresetName != nil {
+                                Button {
+                                    selectedTimerPresetName = nil
+                                } label: {
+                                    HStack(spacing: Spacing.xs) {
+                                        Image(systemName: "xmark.circle")
+                                            .font(.system(size: 12))
+                                        Text("Clear Timer")
                                             .font(.bakeryBody(13))
                                     }
                                     .foregroundColor(.terracotta)
@@ -305,6 +360,26 @@ struct AddRecipeView: View {
             .sheet(isPresented: $showingTemplatePicker) {
                 TemplatePickerView(selectedTemplate: $selectedTemplate, templates: templates)
             }
+            .sheet(isPresented: $showingTimerPicker) {
+                TimerPresetPickerSheet(
+                    presets: timerPresets,
+                    selectedPresetName: selectedTimerPresetName
+                ) { presetName in
+                    selectedTimerPresetName = presetName
+                }
+            }
+            .onChange(of: selectedTemplate) { _, newTemplate in
+                // Auto-suggest matching timer preset when template is selected
+                if let template = newTemplate {
+                    let matchingPreset = timerPresets.first { preset in
+                        preset.name.localizedCaseInsensitiveContains(template.name) ||
+                        template.name.localizedCaseInsensitiveContains(preset.name)
+                    }
+                    if let match = matchingPreset {
+                        selectedTimerPresetName = match.name
+                    }
+                }
+            }
         }
     }
 
@@ -312,7 +387,7 @@ struct AddRecipeView: View {
         // Use template instructions if user hasn't written their own
         let finalInstructions = instructions.isEmpty ? (selectedTemplate?.instructions ?? "") : instructions
 
-        let newRecipe = Recipe(name: name, totalFlourGrams: totalFlourGrams, instructions: finalInstructions, notes: notes)
+        let newRecipe = Recipe(name: name, totalFlourGrams: totalFlourGrams, instructions: finalInstructions, notes: notes, timerPresetName: selectedTimerPresetName)
 
         // Copy ingredients from template if selected
         if let template = selectedTemplate {
@@ -517,5 +592,5 @@ struct TemplatePickerRow: View {
 
 #Preview {
     AddRecipeView()
-        .modelContainer(for: [Recipe.self, Ingredient.self, RecipeTemplate.self, TemplateIngredient.self], inMemory: true)
+        .modelContainer(for: [Recipe.self, Ingredient.self, RecipeTemplate.self, TemplateIngredient.self, TimerPreset.self, TimerPresetStep.self, BakeTimer.self, BakeTimerStep.self], inMemory: true)
 }

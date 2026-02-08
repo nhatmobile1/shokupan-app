@@ -6,10 +6,56 @@
 - [x] Phase 3 & 4: iCloud sync, photos, tags
 - [x] Phase 5: Recipe templates
 - [x] Phase 6: UI Polish & Bug Fixes
+- [x] Phase 7: Bake Timer & Scheduling (except Live Activities)
+- [x] DDT Calculator (from Phase 9 roadmap)
 
 ---
 
 ## Changelog
+
+### Session: February 2026 - Phase 7 Completion + DDT Calculator
+
+#### Phase 7.6: Recipe-Timer Integration
+- Added `timerPresetName: String?` to Recipe model (lightweight link by name)
+- Timer section in RecipeDetailView: shows linked timer, "Start Timer" button, change/remove menu
+- TimerPresetPickerSheet: reusable picker for choosing timer presets
+- Timer preset picker in AddRecipeView with auto-suggest matching by template name
+- Updated Recipe.clone() to preserve timer preset link
+
+#### Phase 7.7: Notification Actions
+- Registered UNNotificationCategory with "Pause" and "Next Step" actions
+- Added AppDelegate with UNUserNotificationCenterDelegate for handling action responses
+- Foreground notification presentation (banner + sound)
+- Routes notification actions to TimerManager.shared
+
+#### DDT Calculator
+- New DDTCalculatorView: calculates water temperature from DDT formula
+  - Supports straight dough (3×) and preferment (4×) formulas
+  - Pre-fills defaults from Settings
+  - Temperature warnings for extreme values
+  - Formula breakdown display
+  - Educational info section
+- Settings: new "Dough Temperature" section with default DDT, friction factor, mixing method picker
+- MixingMethod enum: Hand (7°F/4°C), Stand Mixer (22°F/12°C), Spiral Mixer (30°F/17°C)
+- Integrated into RecipeDetailView as "Dough Temperature" section
+- Auto-detects preferment from recipe ingredients
+
+#### Files Modified
+| File | Changes |
+|------|---------|
+| `Models/Recipe.swift` | Added `timerPresetName`, updated init and clone |
+| `Views/Recipes/RecipeDetailView.swift` | Timer section, DDT section, TimerPresetPickerSheet, picker states |
+| `Views/Recipes/AddRecipeView.swift` | Timer preset picker, auto-suggest on template selection |
+| `Services/TimerManager.swift` | Notification category + actions, handleNotificationAction() |
+| `ShokupaniosApp.swift` | AppDelegate for notification handling |
+| `Views/Settings/SettingsView.swift` | DDT defaults section, MixingMethod enum |
+
+#### Files Created
+| File | Purpose |
+|------|---------|
+| `Views/Recipes/DDTCalculatorView.swift` | DDT water temperature calculator |
+
+---
 
 ### Session: January 2025 - UI Polish & Bug Fixes
 
@@ -152,6 +198,12 @@ Shokupanios/
 - ✅ Tags and filtering
 - ✅ Pan size presets (1 kin, 1.5 kin, 2 kin)
 - ✅ Metric/Imperial unit toggle
+- ✅ Multi-step bake timers (5 built-in presets)
+- ✅ Timer controls: start/pause/resume/skip/reset
+- ✅ Recipe-timer integration (link presets, start from recipe)
+- ✅ Background notifications with Pause/Next actions
+- ✅ DDT calculator (water temperature from room/flour/friction)
+- ✅ Mixing method settings (hand, stand mixer, spiral)
 
 ### Design System
 - Wabi-sabi aesthetic (warm, artisanal, imperfect)
@@ -205,11 +257,11 @@ Shokupanios/
 
 ## Future Phases Roadmap
 
-### Phase 7: Bake Timer & Scheduling
-- Multi-step timers (autolyse → bulk → proof → bake)
-- Background notifications when timers complete
-- Save timer presets per recipe
-- Live Activities for active timers (iOS 16+)
+### Phase 7: Bake Timer & Scheduling ✅ (except Live Activities)
+- ~~Multi-step timers (autolyse → bulk → proof → bake)~~ Done
+- ~~Background notifications when timers complete~~ Done
+- ~~Save timer presets per recipe~~ Done
+- Live Activities for active timers (iOS 16+) — Deferred
 
 ### Phase 8: Enhanced Export & Sharing
 - Export recipe as PDF with formatted layout
@@ -217,10 +269,10 @@ Shokupanios/
 - Share to other Shokupan users
 - Print-friendly recipe view
 
-### Phase 9: Fermentation Calculator
-- Desired Dough Temperature (DDT) calculator
+### Phase 9: Fermentation Calculator (Partially Done)
+- ~~Desired Dough Temperature (DDT) calculator~~ Done
+- ~~Friction factor calculator for mixer~~ Done (integrated in DDT)
 - Proof time estimates based on temperature
-- Friction factor calculator for mixer
 - Yeast conversion (fresh ↔ instant ↔ active dry)
 
 ### Phase 10: Recipe History & Bake Log
@@ -254,84 +306,81 @@ Shokupanios/
 ## Phase 7: Bake Timer & Scheduling
 
 ### Overview
-Multi-step timer system for bread baking with background notifications and Live Activities.
+Multi-step timer system for bread baking with background notifications.
 
 ### Todo Items
 
 #### 7.1 Data Models
-- [ ] Create `BakeTimer` SwiftData model (name, steps, recipe relationship)
-- [ ] Create `TimerStep` model (name, duration, order, isRunning, startedAt)
-- [ ] Create `TimerPreset` model for reusable timer templates
-- [ ] Add optional `timerPreset` relationship to Recipe
+- [x] Create `BakeTimer` SwiftData model (name, steps, recipe relationship)
+- [x] Create `TimerStep` model (name, duration, order, isRunning, startedAt)
+- [x] Create `TimerPreset` model for reusable timer templates
+- [x] Add optional `timerPresetName` to Recipe model
 
 #### 7.2 Timer Service
-- [ ] Create `TimerManager` class (ObservableObject)
-- [ ] Implement background timer with `UNUserNotificationCenter`
-- [ ] Handle app backgrounding/foregrounding
-- [ ] Persist timer state for app restarts
-- [ ] Add haptic feedback on timer completion
+- [x] Create `TimerManager` class (@Observable singleton)
+- [x] Implement background timer with `UNUserNotificationCenter`
+- [x] Handle app backgrounding/foregrounding
+- [x] Persist timer state for app restarts
+- [x] Add haptic feedback on timer completion
 
 #### 7.3 Timer UI - List View
-- [ ] Create `TimerListView` for active/saved timers
-- [ ] Add "Timers" tab to ContentView (4th tab)
-- [ ] Show active timer with countdown
-- [ ] List saved timer presets
+- [x] Create `TimerListView` for active/saved timers
+- [x] Add "Timers" tab to ContentView (4th tab)
+- [x] Show active timer with countdown
+- [x] List saved timer presets
 
 #### 7.4 Timer UI - Detail/Running View
-- [ ] Create `TimerDetailView` with step-by-step display
-- [ ] Large countdown display for current step
-- [ ] Progress indicator across all steps
-- [ ] Pause/Resume/Skip/Reset controls
-- [ ] Audio/vibration on step completion
+- [x] Create `TimerDetailView` with step-by-step display
+- [x] Large countdown display for current step
+- [x] Progress indicator across all steps
+- [x] Pause/Resume/Skip/Reset controls
+- [x] Audio/vibration on step completion
 
 #### 7.5 Timer UI - Create/Edit
-- [ ] Create `AddTimerView` for new timer presets
-- [ ] Add/remove/reorder steps
-- [ ] Duration picker (hours, minutes)
-- [ ] Quick presets (common bread timings)
+- [x] Create `AddTimerView` for new timer presets
+- [x] Add/remove/reorder steps
+- [x] Duration picker (hours, minutes)
+- [x] Quick presets (common bread timings)
 
 #### 7.6 Recipe Integration
-- [ ] Add "Start Timer" button to RecipeDetailView
-- [ ] Option to attach timer preset to recipe
-- [ ] Auto-suggest timer based on recipe instructions
+- [x] Add "Start Timer" button to RecipeDetailView
+- [x] Option to attach timer preset to recipe via name
+- [x] TimerPresetPickerSheet for choosing presets
+- [x] Auto-suggest matching timer when template selected in AddRecipeView
+- [x] Timer preset picker in AddRecipeView
 
 #### 7.7 Notifications
-- [ ] Request notification permissions
-- [ ] Schedule local notifications for each step
-- [ ] Custom notification sounds (optional)
-- [ ] Notification actions (Pause, Skip to Next)
+- [x] Request notification permissions
+- [x] Schedule local notifications for each step
+- [x] Notification actions (Pause, Next Step) via UNNotificationCategory
+- [x] AppDelegate for handling notification responses
+- [x] Foreground notification presentation
 
-#### 7.8 Live Activities (iOS 16+)
+#### 7.8 Live Activities (Deferred)
 - [ ] Create Live Activity for active timer
 - [ ] Show on Lock Screen and Dynamic Island
-- [ ] Update countdown in real-time
-- [ ] Deep link back to app
+- [ ] Requires Widget Extension target — deferred to future phase
 
-### Files to Create
+---
+
+## DDT Calculator (Desired Dough Temperature)
+
+### Overview
+Calculate the water temperature needed to hit a target dough temperature after mixing. Based on the classic DDT formula from King Arthur Baking and The Perfect Loaf.
+
+### Formula
 ```
-Shokupanios/
-├── Models/
-│   └── BakeTimer.swift          # Timer, TimerStep, TimerPreset models
-├── Services/
-│   └── TimerManager.swift       # Timer logic and notifications
-├── Views/
-│   └── Timers/
-│       ├── TimerListView.swift
-│       ├── TimerDetailView.swift
-│       ├── AddTimerView.swift
-│       └── TimerStepRow.swift
-└── Widgets/
-    └── TimerLiveActivity.swift  # Live Activity (separate target)
+Water Temp = (Factor × DDT) - Room Temp - Flour Temp - Friction Factor
+Factor = 3 (straight dough), 4 (with preferment, also subtracts preferment temp)
 ```
 
-### Default Timer Presets
-- **Quick Proof** - 1 hour bulk, 45 min final proof
-- **Sourdough Day** - 30 min autolyse, 4 hr bulk (with folds), 1 hr proof, 45 min bake
-- **Shokupan** - 1.5 hr bulk, 50 min proof, 35 min bake
-- **Overnight Cold Proof** - 1 hr bulk, 12 hr cold proof, 45 min bake
-
-### Technical Notes
-- Use `TimeInterval` for durations
-- Store `startedAt: Date?` to calculate remaining time on app relaunch
-- Use `BGTaskScheduler` for background refresh if needed
-- Live Activities require a Widget Extension target
+### Todo Items
+- [x] Add DDT default settings to SettingsView (target DDT, friction factor, mixing method)
+- [x] Create MixingMethod enum (Hand, Stand Mixer, Spiral) with friction factor values
+- [x] Create DDTCalculatorView with inputs, result display, formula breakdown
+- [x] Add preferment toggle (switches to 4-factor formula)
+- [x] Add temperature warnings (too cold/too hot for yeast)
+- [x] Integrate into RecipeDetailView as "Dough Temperature" section
+- [x] Auto-detect preferment from recipe ingredients
+- [x] Respect Metric/Imperial unit setting
+- [x] Educational info section explaining DDT concepts

@@ -217,11 +217,45 @@ class TimerManager {
 
     // MARK: - Notifications
 
+    static let notificationCategoryID = "TIMER_STEP_COMPLETE"
+    static let pauseActionID = "PAUSE_TIMER"
+    static let skipActionID = "SKIP_STEP"
+
     func requestNotificationPermission() {
+        // Register notification actions
+        let pauseAction = UNNotificationAction(
+            identifier: Self.pauseActionID,
+            title: "Pause",
+            options: []
+        )
+        let skipAction = UNNotificationAction(
+            identifier: Self.skipActionID,
+            title: "Next Step",
+            options: [.foreground]
+        )
+        let category = UNNotificationCategory(
+            identifier: Self.notificationCategoryID,
+            actions: [pauseAction, skipAction],
+            intentIdentifiers: [],
+            options: []
+        )
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error {
                 print("Notification permission error: \(error)")
             }
+        }
+    }
+
+    func handleNotificationAction(_ actionIdentifier: String) {
+        switch actionIdentifier {
+        case Self.pauseActionID:
+            pauseTimer()
+        case Self.skipActionID:
+            skipToNextStep()
+        default:
+            break
         }
     }
 
@@ -230,7 +264,7 @@ class TimerManager {
         content.title = "Timer Complete"
         content.body = "\(step.name) is done!"
         content.sound = .default
-        content.categoryIdentifier = "TIMER_COMPLETE"
+        content.categoryIdentifier = Self.notificationCategoryID
 
         let trigger = UNTimeIntervalNotificationTrigger(
             timeInterval: max(1, step.remainingTime),

@@ -12,9 +12,10 @@ class Recipe {
     var rating: Int?
     @Attribute(.externalStorage) var photoData: Data?
     var tags: [String]
+    var timerPresetName: String?
     @Relationship(deleteRule: .cascade) var ingredients: [Ingredient]
 
-    init(name: String, totalFlourGrams: Double = 250.0, instructions: String = "", notes: String = "", rating: Int? = nil, tags: [String] = []) {
+    init(name: String, totalFlourGrams: Double = 250.0, instructions: String = "", notes: String = "", rating: Int? = nil, tags: [String] = [], timerPresetName: String? = nil) {
         self.name = name
         self.totalFlourGrams = totalFlourGrams
         self.createdDate = Date()
@@ -24,6 +25,7 @@ class Recipe {
         self.rating = rating
         self.photoData = nil
         self.tags = tags
+        self.timerPresetName = timerPresetName
         self.ingredients = []
     }
 
@@ -63,7 +65,8 @@ class Recipe {
             instructions: instructions,
             notes: notes,
             rating: rating,
-            tags: tags
+            tags: tags,
+            timerPresetName: timerPresetName
         )
         cloned.photoData = photoData
         for ingredient in ingredients {

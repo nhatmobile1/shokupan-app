@@ -8,6 +8,13 @@ struct SettingsView: View {
     @AppStorage("panSize1_5Kin") private var panSize1_5Kin = 398.0
     @AppStorage("panSize2Kin") private var panSize2Kin = 530.0
 
+    // DDT defaults
+    @AppStorage("defaultDDT") private var defaultDDT = 78.0       // °F
+    @AppStorage("defaultDDTMetric") private var defaultDDTMetric = 25.5  // °C
+    @AppStorage("mixingMethod") private var mixingMethod = MixingMethod.standMixer.rawValue
+    @AppStorage("defaultFrictionFactor") private var defaultFrictionFactor = 22.0  // °F
+    @AppStorage("defaultFrictionFactorMetric") private var defaultFrictionFactorMetric = 12.0  // °C
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -118,6 +125,111 @@ struct SettingsView: View {
                                 .padding(.top, Spacing.sm)
 
                                 Text("Customize flour amounts for your pan sizes. These appear as quick presets when scaling recipes.")
+                                    .font(.bakeryBody(12))
+                                    .foregroundColor(.stoneGray)
+                                    .padding(.top, Spacing.xs)
+                            }
+                        }
+
+                        // Dough Temperature Section
+                        settingsCard {
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                Label {
+                                    Text("Dough Temperature")
+                                        .sectionHeader()
+                                } icon: {
+                                    Image(systemName: "thermometer.medium")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.crustBrown)
+                                }
+
+                                VStack(spacing: Spacing.sm) {
+                                    // Mixing Method Picker
+                                    HStack {
+                                        Text("Mixing method")
+                                            .font(.bakeryBody(15))
+                                            .foregroundColor(.inkBrown)
+
+                                        Spacer()
+
+                                        Picker("", selection: Binding(
+                                            get: { MixingMethod(rawValue: mixingMethod) ?? .standMixer },
+                                            set: { method in
+                                                mixingMethod = method.rawValue
+                                                // Auto-update friction factor
+                                                defaultFrictionFactor = method.frictionFactorF
+                                                defaultFrictionFactorMetric = method.frictionFactorC
+                                            }
+                                        )) {
+                                            ForEach(MixingMethod.allCases, id: \.self) { method in
+                                                Text(method.displayName).tag(method)
+                                            }
+                                        }
+                                        .tint(.terracotta)
+                                    }
+
+                                    WarmDivider()
+
+                                    // Default DDT
+                                    HStack {
+                                        Text("Target DDT")
+                                            .font(.bakeryBody(15))
+                                            .foregroundColor(.inkBrown)
+
+                                        Spacer()
+
+                                        HStack(spacing: Spacing.sm) {
+                                            TextField("", value: useMetricUnits ? $defaultDDTMetric : $defaultDDT, format: .number)
+                                                .font(.bakeryMono(16))
+                                                .foregroundColor(.inkBrown)
+                                                .keyboardType(.decimalPad)
+                                                .multilineTextAlignment(.trailing)
+                                                .frame(width: 50)
+                                                .padding(.horizontal, Spacing.sm)
+                                                .padding(.vertical, Spacing.xs)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: CornerRadius.sm, style: .continuous)
+                                                        .fill(Color.panCrumb.opacity(0.5))
+                                                )
+
+                                            Text(useMetricUnits ? "°C" : "°F")
+                                                .font(.bakeryBody(13))
+                                                .foregroundColor(.stoneGray)
+                                        }
+                                    }
+
+                                    WarmDivider()
+
+                                    // Friction Factor
+                                    HStack {
+                                        Text("Friction factor")
+                                            .font(.bakeryBody(15))
+                                            .foregroundColor(.inkBrown)
+
+                                        Spacer()
+
+                                        HStack(spacing: Spacing.sm) {
+                                            TextField("", value: useMetricUnits ? $defaultFrictionFactorMetric : $defaultFrictionFactor, format: .number)
+                                                .font(.bakeryMono(16))
+                                                .foregroundColor(.inkBrown)
+                                                .keyboardType(.decimalPad)
+                                                .multilineTextAlignment(.trailing)
+                                                .frame(width: 50)
+                                                .padding(.horizontal, Spacing.sm)
+                                                .padding(.vertical, Spacing.xs)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: CornerRadius.sm, style: .continuous)
+                                                        .fill(Color.panCrumb.opacity(0.5))
+                                                )
+
+                                            Text(useMetricUnits ? "°C" : "°F")
+                                                .font(.bakeryBody(13))
+                                                .foregroundColor(.stoneGray)
+                                        }
+                                    }
+                                }
+
+                                Text("These defaults pre-fill the DDT calculator. Desired Dough Temperature helps you calculate the right water temperature for consistent results.")
                                     .font(.bakeryBody(12))
                                     .foregroundColor(.stoneGray)
                                     .padding(.top, Spacing.xs)
@@ -329,6 +441,40 @@ enum AppTheme: String, CaseIterable {
         case .system: return nil
         case .light: return .light
         case .dark: return .dark
+        }
+    }
+}
+
+// MARK: - Mixing Method
+
+enum MixingMethod: String, CaseIterable {
+    case hand = "hand"
+    case standMixer = "standMixer"
+    case spiralMixer = "spiralMixer"
+
+    var displayName: String {
+        switch self {
+        case .hand: return "By Hand"
+        case .standMixer: return "Stand Mixer"
+        case .spiralMixer: return "Spiral Mixer"
+        }
+    }
+
+    /// Friction factor in Fahrenheit
+    var frictionFactorF: Double {
+        switch self {
+        case .hand: return 7.0
+        case .standMixer: return 22.0
+        case .spiralMixer: return 30.0
+        }
+    }
+
+    /// Friction factor in Celsius
+    var frictionFactorC: Double {
+        switch self {
+        case .hand: return 4.0
+        case .standMixer: return 12.0
+        case .spiralMixer: return 17.0
         }
     }
 }

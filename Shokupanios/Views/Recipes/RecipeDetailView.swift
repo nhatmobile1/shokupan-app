@@ -5,6 +5,8 @@ import PhotosUI
 struct RecipeDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var recipe: Recipe
+    @Query(sort: \TimerPreset.name) private var timerPresets: [TimerPreset]
+    private var timerManager = TimerManager.shared
 
     @State private var showingAddIngredient = false
     @State private var showingCloneAlert = false
@@ -22,12 +24,18 @@ struct RecipeDetailView: View {
     @State private var showingEditNotes = false
     @State private var editingInstructions = ""
     @State private var editingNotes = ""
+    @State private var showingTimerPicker = false
+    @State private var showingDDTCalculator = false
 
     // Global settings
     @AppStorage("useMetricUnits") private var useMetricUnits = true
     @AppStorage("panSize1Kin") private var panSize1Kin = 250.0
     @AppStorage("panSize1_5Kin") private var panSize1_5Kin = 375.0
     @AppStorage("panSize2Kin") private var panSize2Kin = 500.0
+
+    init(recipe: Recipe) {
+        self.recipe = recipe
+    }
 
     enum ScaleMode: String, CaseIterable {
         case flour = "By Flour"
@@ -61,6 +69,12 @@ struct RecipeDetailView: View {
 
                         // Instructions
                         instructionsSection
+
+                        // Timer
+                        timerSection
+
+                        // Dough Temperature
+                        doughTemperatureSection
 
                         // Notes
                         notesSection
@@ -165,6 +179,18 @@ struct RecipeDetailView: View {
                 recipe.notes = editingNotes
                 recipe.lastModifiedDate = Date()
             }
+        }
+        .sheet(isPresented: $showingTimerPicker) {
+            TimerPresetPickerSheet(
+                presets: timerPresets,
+                selectedPresetName: recipe.timerPresetName
+            ) { presetName in
+                recipe.timerPresetName = presetName
+                recipe.lastModifiedDate = Date()
+            }
+        }
+        .sheet(isPresented: $showingDDTCalculator) {
+            DDTCalculatorView(hasPreferment: recipeHasPreferment)
         }
         .onAppear {
             editingInstructions = recipe.instructions
@@ -470,6 +496,170 @@ struct RecipeDetailView: View {
                 .foregroundColor(.inkBrown)
                 .lineSpacing(4)
         }
+    }
+
+    // MARK: - Timer Section
+
+    private var timerSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            Text("Timer")
+                .sectionHeader()
+
+            if let presetName = recipe.timerPresetName,
+               let preset = timerPresets.first(where: { $0.name == presetName }) {
+                // Linked timer preset
+                VStack(spacing: Spacing.md) {
+                    HStack(spacing: Spacing.md) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.terracotta.opacity(0.1))
+                                .frame(width: 40, height: 40)
+
+                            Image(systemName: "timer")
+                                .font(.system(size: 16))
+                                .foregroundColor(.terracotta)
+                        }
+
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text(preset.name)
+                                .font(.bakeryBodyMedium(15))
+                                .foregroundColor(.inkBrown)
+
+                            HStack(spacing: Spacing.sm) {
+                                Text("\(preset.steps.count) steps")
+                                    .font(.bakeryBody(12))
+                                    .foregroundColor(.stoneGray)
+
+                                Text("•")
+                                    .foregroundColor(.stoneGray)
+
+                                Text(preset.totalDuration.shortFormatted)
+                                    .font(.bakeryMono(12))
+                                    .foregroundColor(.stoneGray)
+                            }
+                        }
+
+                        Spacer()
+                    }
+
+                    HStack(spacing: Spacing.sm) {
+                        Button {
+                            timerManager.startTimer(from: preset, in: modelContext)
+                        } label: {
+                            HStack(spacing: Spacing.sm) {
+                                Image(systemName: "play.fill")
+                                    .font(.system(size: 12))
+                                Text("Start Timer")
+                                    .font(.bakeryBodyMedium(14))
+                            }
+                            .foregroundColor(.flourWhite)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, Spacing.sm)
+                            .background(
+                                RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                                    .fill(Color.terracotta)
+                            )
+                        }
+                        .buttonStyle(.plain)
+
+                        Menu {
+                            Button {
+                                showingTimerPicker = true
+                            } label: {
+                                Label("Change Timer", systemImage: "arrow.triangle.2.circlepath")
+                            }
+                            Button(role: .destructive) {
+                                recipe.timerPresetName = nil
+                                recipe.lastModifiedDate = Date()
+                            } label: {
+                                Label("Remove Timer", systemImage: "minus.circle")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.stoneGray)
+                                .frame(width: 36, height: 36)
+                                .background(
+                                    RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                                        .fill(Color.panCrumb)
+                                )
+                        }
+                    }
+                }
+            } else {
+                // No timer linked
+                Button {
+                    showingTimerPicker = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Add a bake timer")
+                                .font(.bakeryBodyMedium(15))
+                                .foregroundColor(.inkBrown)
+                            Text("Track each step of your bake")
+                                .font(.bakeryBody(13))
+                                .foregroundColor(.stoneGray)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "timer")
+                            .font(.system(size: 18))
+                            .foregroundColor(.terracotta)
+                    }
+                    .padding(Spacing.md)
+                    .background(
+                        RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                            .fill(Color.terracotta.opacity(0.08))
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(Spacing.lg)
+        .warmCard()
+    }
+
+    // MARK: - Dough Temperature Section
+
+    private var doughTemperatureSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            Text("Dough Temperature")
+                .sectionHeader()
+
+            Button {
+                showingDDTCalculator = true
+            } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("Calculate water temperature")
+                            .font(.bakeryBodyMedium(15))
+                            .foregroundColor(.inkBrown)
+                        Text("Hit your desired dough temperature")
+                            .font(.bakeryBody(13))
+                            .foregroundColor(.stoneGray)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "thermometer.medium")
+                        .font(.system(size: 18))
+                        .foregroundColor(.terracotta)
+                }
+                .padding(Spacing.md)
+                .background(
+                    RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                        .fill(Color.terracotta.opacity(0.08))
+                )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(Spacing.lg)
+        .warmCard()
+    }
+
+    private var recipeHasPreferment: Bool {
+        recipe.ingredients.contains { $0.section == .preferment }
     }
 
     // MARK: - Scale Sheet
@@ -897,16 +1087,186 @@ struct CameraPicker: UIViewControllerRepresentable {
     }
 }
 
-#Preview {
-    let recipe = Recipe(name: "Shokupan", totalFlourGrams: 250, notes: "First attempt at Japanese milk bread. Very soft and fluffy!", tags: ["japanese", "milk bread"])
-    recipe.ingredients.append(Ingredient(name: "Bread Flour", percentage: 1.0, section: .finalDough))
-    recipe.ingredients.append(Ingredient(name: "Water", percentage: 0.65, section: .finalDough))
-    recipe.ingredients.append(Ingredient(name: "Sugar", percentage: 0.08, section: .finalDough))
-    recipe.ingredients.append(Ingredient(name: "Flour", percentage: 0.2, section: .preferment))
-    recipe.ingredients.append(Ingredient(name: "Water", percentage: 0.2, section: .preferment))
+// MARK: - Timer Preset Picker Sheet
 
-    return NavigationStack {
-        RecipeDetailView(recipe: recipe)
+struct TimerPresetPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let presets: [TimerPreset]
+    let selectedPresetName: String?
+    let onSelect: (String?) -> Void
+
+    private var builtInPresets: [TimerPreset] {
+        presets.filter { $0.isBuiltIn }
     }
-    .modelContainer(for: [Recipe.self, Ingredient.self], inMemory: true)
+
+    private var userPresets: [TimerPreset] {
+        presets.filter { !$0.isBuiltIn }
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.panCream.ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        // None option
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            Button {
+                                onSelect(nil)
+                                dismiss()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "xmark.circle")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.stoneGray)
+
+                                    Text("No Timer")
+                                        .font(.bakeryBodyMedium(15))
+                                        .foregroundColor(.inkBrown)
+
+                                    Spacer()
+
+                                    if selectedPresetName == nil {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.terracotta)
+                                    }
+                                }
+                                .padding(Spacing.md)
+                                .background(
+                                    RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
+                                        .fill(selectedPresetName == nil ? Color.terracotta.opacity(0.08) : Color.flourWhite)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(Spacing.lg)
+                        .warmCard()
+
+                        // Built-in Presets
+                        if !builtInPresets.isEmpty {
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                Text("Built-in Timers")
+                                    .sectionHeader()
+
+                                ForEach(builtInPresets) { preset in
+                                    timerPresetRow(preset)
+
+                                    if preset.id != builtInPresets.last?.id {
+                                        WarmDivider()
+                                    }
+                                }
+                            }
+                            .padding(Spacing.lg)
+                            .warmCard()
+                        }
+
+                        // User Presets
+                        if !userPresets.isEmpty {
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                Text("My Timers")
+                                    .sectionHeader()
+
+                                ForEach(userPresets) { preset in
+                                    timerPresetRow(preset)
+
+                                    if preset.id != userPresets.last?.id {
+                                        WarmDivider()
+                                    }
+                                }
+                            }
+                            .padding(Spacing.lg)
+                            .warmCard()
+                        }
+                    }
+                    .padding(Spacing.md)
+                }
+                .scrollIndicators(.hidden)
+            }
+            .navigationTitle("Choose Timer")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .foregroundColor(.stoneGray)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func timerPresetRow(_ preset: TimerPreset) -> some View {
+        Button {
+            onSelect(preset.name)
+            dismiss()
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    HStack(spacing: Spacing.sm) {
+                        Text(preset.name)
+                            .font(.bakeryBodyMedium(15))
+                            .foregroundColor(.inkBrown)
+
+                        if preset.isBuiltIn {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(.terracotta.opacity(0.6))
+                        }
+                    }
+
+                    HStack(spacing: Spacing.sm) {
+                        Text("\(preset.steps.count) steps")
+                            .font(.bakeryBody(12))
+                            .foregroundColor(.stoneGray)
+
+                        Text("•")
+                            .foregroundColor(.stoneGray)
+
+                        Text(preset.totalDuration.shortFormatted)
+                            .font(.bakeryMono(12))
+                            .foregroundColor(.stoneGray)
+                    }
+                }
+
+                Spacer()
+
+                if selectedPresetName == preset.name {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.terracotta)
+                }
+            }
+            .padding(.vertical, Spacing.sm)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct RecipeDetailPreview: View {
+    @State var recipe: Recipe
+
+    init() {
+        let r = Recipe(name: "Shokupan", totalFlourGrams: 250, notes: "First attempt at Japanese milk bread. Very soft and fluffy!", tags: ["japanese", "milk bread"])
+        r.ingredients.append(Ingredient(name: "Bread Flour", percentage: 1.0, section: .finalDough))
+        r.ingredients.append(Ingredient(name: "Water", percentage: 0.65, section: .finalDough))
+        r.ingredients.append(Ingredient(name: "Sugar", percentage: 0.08, section: .finalDough))
+        r.ingredients.append(Ingredient(name: "Flour", percentage: 0.2, section: .preferment))
+        r.ingredients.append(Ingredient(name: "Water", percentage: 0.2, section: .preferment))
+        _recipe = State(initialValue: r)
+    }
+
+    var body: some View {
+        NavigationStack {
+            RecipeDetailView(recipe: recipe)
+        }
+    }
+}
+
+#Preview {
+    RecipeDetailPreview()
+        .modelContainer(for: [Recipe.self, Ingredient.self, TimerPreset.self, TimerPresetStep.self, BakeTimer.self, BakeTimerStep.self], inMemory: true)
 }
