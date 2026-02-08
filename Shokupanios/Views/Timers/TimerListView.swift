@@ -104,16 +104,16 @@ struct TimerListView: View {
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         HStack(spacing: Spacing.sm) {
                             Circle()
-                                .fill(timerManager.isRunning ? Color.green : Color.orange)
+                                .fill(timerManager.isRunning ? Color.timerRunning : Color.timerPaused)
                                 .frame(width: 8, height: 8)
 
                             Text(timerManager.isRunning ? "Running" : "Paused")
-                                .font(.bakeryBody(12))
-                                .foregroundColor(timerManager.isRunning ? .green : .orange)
+                                .font(.bakeryCaption)
+                                .foregroundColor(timerManager.isRunning ? .timerRunning : .timerPaused)
                         }
 
                         Text(timer.name)
-                            .font(.bakerySerifMedium(20))
+                            .font(.bakeryTitle)
                             .foregroundColor(.inkBrown)
                     }
 
@@ -122,18 +122,19 @@ struct TimerListView: View {
                     Text(timerManager.displayTime.formatted)
                         .font(.bakeryMono(32))
                         .foregroundColor(.terracotta)
+                        .accessibilityLabel("Time remaining: \(timerManager.displayTime.formatted)")
                 }
 
                 if let step = timer.currentStep {
                     HStack {
                         Text(step.name)
-                            .font(.bakeryBody(14))
+                            .font(.bakerySubheadline)
                             .foregroundColor(.stoneGray)
 
                         Spacer()
 
                         Text("Step \(timer.currentStepIndex + 1) of \(timer.steps.count)")
-                            .font(.bakeryBody(12))
+                            .font(.bakeryCaption)
                             .foregroundColor(.stoneGray)
                     }
 
@@ -225,7 +226,7 @@ struct TimerPresetCard: View {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 HStack(spacing: Spacing.sm) {
                     Text(preset.name)
-                        .font(.bakeryBodyMedium(16))
+                        .font(.bakeryBodyMediumDynamic)
                         .foregroundColor(.inkBrown)
 
                     if preset.isBuiltIn {
@@ -237,14 +238,14 @@ struct TimerPresetCard: View {
 
                 HStack(spacing: Spacing.sm) {
                     Label("\(preset.steps.count) steps", systemImage: "list.number")
-                        .font(.bakeryBody(12))
+                        .font(.bakeryCaption)
                         .foregroundColor(.stoneGray)
 
                     Text("•")
                         .foregroundColor(.stoneGray)
 
                     Text(preset.totalDuration.shortFormatted)
-                        .font(.bakeryMono(12))
+                        .font(.bakeryMonoCaption)
                         .foregroundColor(.stoneGray)
                 }
             }
@@ -262,7 +263,7 @@ struct TimerPresetCard: View {
         }
         .padding(Spacing.md)
         .warmCard()
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+        .contextMenu {
             if let onDelete = onDelete {
                 Button(role: .destructive, action: onDelete) {
                     Label("Delete", systemImage: "trash")

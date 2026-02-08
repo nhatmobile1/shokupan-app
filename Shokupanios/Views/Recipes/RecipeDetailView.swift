@@ -57,9 +57,7 @@ struct RecipeDetailView: View {
                         quickStatsSection
 
                         // Tags
-                        if !recipe.tags.isEmpty || true {
-                            tagsSection
-                        }
+                        tagsSection
 
                         // Scale Recipe
                         scaleSection
@@ -391,10 +389,10 @@ struct RecipeDetailView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("Adjust amounts")
-                            .font(.bakeryBodyMedium(15))
+                            .font(.bakeryBodyMediumDynamic)
                             .foregroundColor(.inkBrown)
                         Text("Scale by flour weight or target dough")
-                            .font(.bakeryBody(13))
+                            .font(.bakerySubheadline)
                             .foregroundColor(.stoneGray)
                     }
 
@@ -454,9 +452,13 @@ struct RecipeDetailView: View {
                                 ingredient: ingredient,
                                 weight: formatWeight(ingredient.weight(basedOn: recipe.totalFlourGrams))
                             )
-                        }
-                        .onDelete { offsets in
-                            deleteIngredients(in: section, at: offsets)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    deleteIngredient(ingredient)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                         }
                     }
                 }
@@ -522,19 +524,19 @@ struct RecipeDetailView: View {
 
                         VStack(alignment: .leading, spacing: Spacing.xs) {
                             Text(preset.name)
-                                .font(.bakeryBodyMedium(15))
+                                .font(.bakeryBodyMediumDynamic)
                                 .foregroundColor(.inkBrown)
 
                             HStack(spacing: Spacing.sm) {
                                 Text("\(preset.steps.count) steps")
-                                    .font(.bakeryBody(12))
+                                    .font(.bakeryCaption)
                                     .foregroundColor(.stoneGray)
 
                                 Text("•")
                                     .foregroundColor(.stoneGray)
 
                                 Text(preset.totalDuration.shortFormatted)
-                                    .font(.bakeryMono(12))
+                                    .font(.bakeryMonoCaption)
                                     .foregroundColor(.stoneGray)
                             }
                         }
@@ -550,7 +552,7 @@ struct RecipeDetailView: View {
                                 Image(systemName: "play.fill")
                                     .font(.system(size: 12))
                                 Text("Start Timer")
-                                    .font(.bakeryBodyMedium(14))
+                                    .font(.bakerySubheadlineMedium)
                             }
                             .foregroundColor(.flourWhite)
                             .frame(maxWidth: .infinity)
@@ -578,7 +580,7 @@ struct RecipeDetailView: View {
                             Image(systemName: "ellipsis")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.stoneGray)
-                                .frame(width: 36, height: 36)
+                                .frame(width: 44, height: 44)
                                 .background(
                                     RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
                                         .fill(Color.panCrumb)
@@ -594,10 +596,10 @@ struct RecipeDetailView: View {
                     HStack {
                         VStack(alignment: .leading, spacing: Spacing.xs) {
                             Text("Add a bake timer")
-                                .font(.bakeryBodyMedium(15))
+                                .font(.bakeryBodyMediumDynamic)
                                 .foregroundColor(.inkBrown)
                             Text("Track each step of your bake")
-                                .font(.bakeryBody(13))
+                                .font(.bakerySubheadline)
                                 .foregroundColor(.stoneGray)
                         }
 
@@ -633,10 +635,10 @@ struct RecipeDetailView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("Calculate water temperature")
-                            .font(.bakeryBodyMedium(15))
+                            .font(.bakeryBodyMediumDynamic)
                             .foregroundColor(.inkBrown)
                         Text("Hit your desired dough temperature")
-                            .font(.bakeryBody(13))
+                            .font(.bakerySubheadline)
                             .foregroundColor(.stoneGray)
                     }
 
@@ -695,7 +697,7 @@ struct RecipeDetailView: View {
                                     .foregroundColor(.inkBrown)
 
                                 Text("grams")
-                                    .font(.bakeryBody(16))
+                                    .font(.bakerySubheadline)
                                     .foregroundColor(.stoneGray)
                             }
                             .padding(Spacing.md)
@@ -726,13 +728,13 @@ struct RecipeDetailView: View {
                                 } label: {
                                     HStack {
                                         Text(preset.0)
-                                            .font(.bakeryBodyMedium(15))
+                                            .font(.bakeryBodyMediumDynamic)
                                             .foregroundColor(.inkBrown)
 
                                         Spacer()
 
                                         Text(scaleMode == .flour ? "\(Int(preset.1))g flour" : "~\(Int(targetValue))g dough")
-                                            .font(.bakeryMono(13))
+                                            .font(.bakeryMonoCaption)
                                             .foregroundColor(.stoneGray)
 
                                         if inputAmount == String(Int(targetValue)) {
@@ -789,7 +791,7 @@ struct RecipeDetailView: View {
                     }
                     .font(.bakeryBodyMedium(16))
                     .foregroundColor(.terracotta)
-                    .disabled(Double(inputAmount) == nil || Double(inputAmount)! <= 0)
+                    .disabled((Double(inputAmount) ?? 0) <= 0)
                 }
             }
             .onChange(of: scaleMode) { _, newMode in
@@ -905,13 +907,8 @@ struct RecipeDetailView: View {
         showingScaleSheet = false
     }
 
-    private func deleteIngredients(in section: IngredientSection, at offsets: IndexSet) {
-        let sectionIngredients = ingredientsFor(section: section)
-        for index in offsets {
-            if let ingredientIndex = recipe.ingredients.firstIndex(where: { $0.id == sectionIngredients[index].id }) {
-                recipe.ingredients.remove(at: ingredientIndex)
-            }
-        }
+    private func deleteIngredient(_ ingredient: Ingredient) {
+        recipe.ingredients.removeAll { $0.id == ingredient.id }
         recipe.lastModifiedDate = Date()
     }
 
@@ -944,11 +941,11 @@ struct StatCard: View {
                 .foregroundColor(.terracotta.opacity(0.8))
 
             Text(value)
-                .font(.bakeryMono(16))
+                .font(.bakeryMonoDynamic)
                 .foregroundColor(.inkBrown)
 
             Text(label)
-                .font(.bakeryBody(11))
+                .font(.bakeryCaption)
                 .foregroundColor(.stoneGray)
         }
         .frame(maxWidth: .infinity)
@@ -956,7 +953,10 @@ struct StatCard: View {
         .background(
             RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous)
                 .fill(Color.flourWhite)
+                .shadow(color: Color.warmBrown.opacity(0.04), radius: 4, x: 0, y: 2)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(label): \(value)")
     }
 }
 
@@ -965,7 +965,7 @@ struct IngredientRow: View {
     let weight: String
 
     private func formatPercentage(_ value: Double) -> String {
-        let rounded = (value * 10).rounded() / 10  // Round to 1 decimal place
+        let rounded = (value * 10).rounded() / 10
         if rounded == rounded.rounded() {
             return "\(Int(rounded))%"
         } else {
@@ -976,114 +976,24 @@ struct IngredientRow: View {
     var body: some View {
         HStack {
             Text(ingredient.name)
-                .font(.bakeryBody(15))
+                .font(.bakeryBodyDynamic)
                 .foregroundColor(.inkBrown)
 
             Spacer()
 
             VStack(alignment: .trailing, spacing: 2) {
                 Text(weight)
-                    .font(.bakeryMono(15))
+                    .font(.bakeryMonoDynamic)
                     .foregroundColor(.inkBrown)
 
                 Text(formatPercentage(ingredient.percentage * 100))
-                    .font(.bakeryMono(12))
+                    .font(.bakeryMonoCaption)
                     .foregroundColor(.stoneGray)
             }
         }
         .padding(.vertical, Spacing.sm)
-    }
-}
-
-// MARK: - Flow Layout for Tags
-
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = arrangeSubviews(proposal: proposal, subviews: subviews)
-        return result.size
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = arrangeSubviews(proposal: proposal, subviews: subviews)
-        for (index, frame) in result.frames.enumerated() {
-            subviews[index].place(at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY), proposal: ProposedViewSize(frame.size))
-        }
-    }
-
-    private func arrangeSubviews(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, frames: [CGRect]) {
-        let maxWidth = proposal.width ?? .infinity
-        var currentX: CGFloat = 0
-        var currentY: CGFloat = 0
-        var lineHeight: CGFloat = 0
-        var frames: [CGRect] = []
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-
-            if currentX + size.width > maxWidth && currentX > 0 {
-                currentX = 0
-                currentY += lineHeight + spacing
-                lineHeight = 0
-            }
-
-            frames.append(CGRect(x: currentX, y: currentY, width: size.width, height: size.height))
-            lineHeight = max(lineHeight, size.height)
-            currentX += size.width + spacing
-        }
-
-        return (CGSize(width: maxWidth, height: currentY + lineHeight), frames)
-    }
-}
-
-// MARK: - Share Sheet
-
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
-
-// MARK: - Camera Picker
-
-struct CameraPicker: UIViewControllerRepresentable {
-    var onImagePicked: (UIImage) -> Void
-
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.sourceType = .camera
-        picker.delegate = context.coordinator
-        return picker
-    }
-
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onImagePicked: onImagePicked)
-    }
-
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        var onImagePicked: (UIImage) -> Void
-
-        init(onImagePicked: @escaping (UIImage) -> Void) {
-            self.onImagePicked = onImagePicked
-        }
-
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                onImagePicked(image)
-            }
-            picker.dismiss(animated: true)
-        }
-
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            picker.dismiss(animated: true)
-        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(ingredient.name), \(weight), \(formatPercentage(ingredient.percentage * 100))")
     }
 }
 
@@ -1122,7 +1032,7 @@ struct TimerPresetPickerSheet: View {
                                         .foregroundColor(.stoneGray)
 
                                     Text("No Timer")
-                                        .font(.bakeryBodyMedium(15))
+                                        .font(.bakeryBodyMediumDynamic)
                                         .foregroundColor(.inkBrown)
 
                                     Spacer()
@@ -1207,7 +1117,7 @@ struct TimerPresetPickerSheet: View {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     HStack(spacing: Spacing.sm) {
                         Text(preset.name)
-                            .font(.bakeryBodyMedium(15))
+                            .font(.bakeryBodyMediumDynamic)
                             .foregroundColor(.inkBrown)
 
                         if preset.isBuiltIn {
@@ -1219,14 +1129,14 @@ struct TimerPresetPickerSheet: View {
 
                     HStack(spacing: Spacing.sm) {
                         Text("\(preset.steps.count) steps")
-                            .font(.bakeryBody(12))
+                            .font(.bakeryCaption)
                             .foregroundColor(.stoneGray)
 
                         Text("•")
                             .foregroundColor(.stoneGray)
 
                         Text(preset.totalDuration.shortFormatted)
-                            .font(.bakeryMono(12))
+                            .font(.bakeryMonoCaption)
                             .foregroundColor(.stoneGray)
                     }
                 }

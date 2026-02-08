@@ -88,7 +88,7 @@ class TemplateIngredient {
 // MARK: - Default Templates
 struct DefaultTemplates {
     // Increment this version number when built-in templates need to be refreshed
-    private static let currentVersion = 5  // Updated Shokupan to Just One Cookbook recipe
+    private static let currentVersion = 6  // Added Nhat's Shokupan (yudane method)
     private static let versionKey = "builtInTemplatesVersion"
 
     // MARK: - Instructions (from King Arthur Baking)
@@ -114,6 +114,31 @@ struct DefaultTemplates {
    Internal temperature should reach 190°F (88°C).
 
 9. Cool in pan 10 minutes, then transfer to a wire rack.
+"""
+
+    private static let nhatsShokupanInstructions = """
+1. Make Yudane (night before): Weigh out 53g bread flour (20% of total flour). Add 42g boiling water (above 194°F/90°C) and combine with a wooden spatula until no dry flour remains. The combined dough temperature should be around 122°F (50°C). Let cool, then wrap tightly with plastic wrap and refrigerate at least 7 hours or overnight.
+
+2. Prepare ingredients: Warm water to 104°F (40°C). Have butter at room temperature. Tear the chilled yudane into small pieces.
+
+3. Mix wet ingredients: In a stand mixer bowl, combine warm water, sugar, salt, and honey. Sprinkle yeast over top and let sit 2 minutes.
+
+4. Add dry ingredients: Add bread flour, dry milk, and the yudane pieces. Mix at Speed 2 for 2 minutes, then Speed 4 for 4 minutes until dough comes together.
+
+5. Add butter: Add room temperature butter. Mix at Speed 2 until incorporated, then Speed 4 for 4 minutes, finishing with Speed 6 for 3 minutes. Dough should pass the windowpane test.
+
+6. First rise: Transfer to a greased bowl, cover, and let rise 40 minutes until dough triples in size.
+
+7. Shape: Divide into 3 equal pieces. Form into balls and rest 15 minutes. Roll each into a rectangle, fold in thirds lengthwise, then roll up tightly.
+
+8. Final proof: Place rolls seam-side down in a greased 9"×5" loaf pan. Cover and let rise 1 hour until dough reaches 75-80% of pan height (flat-top) or 85-90% (round-top).
+
+9. Bake:
+   • Flat-topped: 415°F (210°C) for 25-30 minutes
+   • Round-topped: 385°F (195°C) for 30 minutes
+   Internal temperature should reach 190°F (88°C).
+
+10. Cool in pan 10 minutes, then transfer to a wire rack.
 """
 
     private static let sourdoughInstructions = """
@@ -243,6 +268,28 @@ struct DefaultTemplates {
             TemplateIngredient(name: "Instant Yeast", percentage: 0.02, section: .finalDough),  // 7g / 350g
         ]
         context.insert(shokupan)
+
+        // Nhat's Shokupan (Yudane method)
+        let nhatsShokupan = RecipeTemplate(
+            name: "Nhat's Shokupan",
+            descriptionText: "Soft Japanese milk bread with yudane",
+            instructions: nhatsShokupanInstructions,
+            isBuiltIn: true
+        )
+        // Based on 265g flour = 100%
+        nhatsShokupan.ingredients = [
+            TemplateIngredient(name: "Bread Flour", percentage: 0.20, section: .yudane),
+            TemplateIngredient(name: "Boiling Water", percentage: 0.16, section: .yudane),
+            TemplateIngredient(name: "Bread Flour", percentage: 0.80, section: .finalDough),
+            TemplateIngredient(name: "Warm Water", percentage: 0.54, section: .finalDough),
+            TemplateIngredient(name: "Sugar", percentage: 0.06, section: .finalDough),
+            TemplateIngredient(name: "Honey", percentage: 0.03, section: .finalDough),
+            TemplateIngredient(name: "Instant Yeast", percentage: 0.014, section: .finalDough),
+            TemplateIngredient(name: "Dry Milk", percentage: 0.06, section: .finalDough),
+            TemplateIngredient(name: "Salt", percentage: 0.02, section: .finalDough),
+            TemplateIngredient(name: "Unsalted Butter", percentage: 0.06, section: .finalDough),
+        ]
+        context.insert(nhatsShokupan)
 
         // Basic Sourdough
         let sourdough = RecipeTemplate(

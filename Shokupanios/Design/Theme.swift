@@ -25,6 +25,7 @@ extension Color {
     static let steamWhite = Color("SteamWhite", bundle: nil, defaultLight: Color(red: 0.98, green: 0.97, blue: 0.95).opacity(0.9), defaultDark: Color(red: 0.20, green: 0.19, blue: 0.18).opacity(0.9))
 
     // Semantic colors
+    static let yudaneColor = Color("YudaneColor", bundle: nil, defaultLight: Color(red: 0.55, green: 0.68, blue: 0.72), defaultDark: Color(red: 0.62, green: 0.75, blue: 0.78))
     static let prefermentColor = Color("PrefermentColor", bundle: nil, defaultLight: Color(red: 0.72, green: 0.65, blue: 0.55), defaultDark: Color(red: 0.78, green: 0.72, blue: 0.62))
     static let finalDoughColor = Color("FinalDoughColor", bundle: nil, defaultLight: Color(red: 0.80, green: 0.52, blue: 0.40), defaultDark: Color(red: 0.88, green: 0.58, blue: 0.46))
 
@@ -44,20 +45,49 @@ extension Color {
         }
     }
 
-    // Tag colors - Studio Ghibli inspired palette
+    // Semantic timer colors (adaptive for dark mode)
+    static let timerRunning = Color("TimerRunning", bundle: nil, defaultLight: Color(red: 0.30, green: 0.70, blue: 0.40), defaultDark: Color(red: 0.40, green: 0.80, blue: 0.50))
+    static let timerPaused = Color("TimerPaused", bundle: nil, defaultLight: Color(red: 0.90, green: 0.65, blue: 0.20), defaultDark: Color(red: 0.95, green: 0.72, blue: 0.30))
+    static let stepCompleted = Color("StepCompleted", bundle: nil, defaultLight: Color(red: 0.30, green: 0.70, blue: 0.40), defaultDark: Color(red: 0.40, green: 0.80, blue: 0.50))
+
+    // Tag colors - Studio Ghibli inspired palette (dark-mode adaptive)
     static let tagColors: [Color] = [
-        Color(red: 0.80, green: 0.33, blue: 0.30),  // Spirited Away red
-        Color(red: 0.20, green: 0.45, blue: 0.55),  // Spirited Away blue
-        Color(red: 0.56, green: 0.72, blue: 0.52),  // Totoro light green
-        Color(red: 0.35, green: 0.55, blue: 0.35),  // Totoro dark green
-        Color(red: 0.68, green: 0.82, blue: 0.95),  // Howl's sky blue
-        Color(red: 0.90, green: 0.52, blue: 0.40),  // Howl's coral
-        Color(red: 0.22, green: 0.38, blue: 0.28),  // Mononoke forest
-        Color(red: 0.58, green: 0.68, blue: 0.52),  // Mononoke sage
-        Color(red: 0.75, green: 0.35, blue: 0.32),  // Kiki's red
-        Color(red: 0.30, green: 0.55, blue: 0.72),  // Wind Rises blue
-        Color(red: 0.88, green: 0.72, blue: 0.55),  // Wind Rises peach
-        Color(red: 0.60, green: 0.68, blue: 0.50),  // Wind Rises olive
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.90, green: 0.45, blue: 0.42, alpha: 1)
+            : UIColor(red: 0.80, green: 0.33, blue: 0.30, alpha: 1) }),  // Spirited Away red
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.30, green: 0.58, blue: 0.70, alpha: 1)
+            : UIColor(red: 0.20, green: 0.45, blue: 0.55, alpha: 1) }),  // Spirited Away blue
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.62, green: 0.78, blue: 0.58, alpha: 1)
+            : UIColor(red: 0.56, green: 0.72, blue: 0.52, alpha: 1) }),  // Totoro light green
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.45, green: 0.65, blue: 0.45, alpha: 1)
+            : UIColor(red: 0.35, green: 0.55, blue: 0.35, alpha: 1) }),  // Totoro dark green
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.50, green: 0.65, blue: 0.80, alpha: 1)
+            : UIColor(red: 0.68, green: 0.82, blue: 0.95, alpha: 1) }),  // Howl's sky blue
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.95, green: 0.58, blue: 0.46, alpha: 1)
+            : UIColor(red: 0.90, green: 0.52, blue: 0.40, alpha: 1) }),  // Howl's coral
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.35, green: 0.52, blue: 0.40, alpha: 1)
+            : UIColor(red: 0.22, green: 0.38, blue: 0.28, alpha: 1) }),  // Mononoke forest
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.65, green: 0.75, blue: 0.58, alpha: 1)
+            : UIColor(red: 0.58, green: 0.68, blue: 0.52, alpha: 1) }),  // Mononoke sage
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.85, green: 0.45, blue: 0.42, alpha: 1)
+            : UIColor(red: 0.75, green: 0.35, blue: 0.32, alpha: 1) }),  // Kiki's red
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.40, green: 0.65, blue: 0.82, alpha: 1)
+            : UIColor(red: 0.30, green: 0.55, blue: 0.72, alpha: 1) }),  // Wind Rises blue
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.92, green: 0.78, blue: 0.60, alpha: 1)
+            : UIColor(red: 0.88, green: 0.72, blue: 0.55, alpha: 1) }),  // Wind Rises peach
+        Color(uiColor: UIColor { t in t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.68, green: 0.75, blue: 0.56, alpha: 1)
+            : UIColor(red: 0.60, green: 0.68, blue: 0.50, alpha: 1) }),  // Wind Rises olive
     ]
 
     /// Returns a consistent color for a given tag string
@@ -134,6 +164,26 @@ extension Font {
     /// Monospace caption - scales with .caption
     static var bakeryMonoCaption: Font {
         .system(.caption, design: .monospaced, weight: .regular)
+    }
+
+    /// Body medium - scales with .body, medium weight
+    static var bakeryBodyMediumDynamic: Font {
+        .system(.body, design: .rounded, weight: .medium)
+    }
+
+    /// Subheadline medium - scales with .subheadline, medium weight
+    static var bakerySubheadlineMedium: Font {
+        .system(.subheadline, design: .rounded, weight: .medium)
+    }
+
+    /// Monospace subheadline - scales with .subheadline
+    static var bakeryMonoSubheadline: Font {
+        .system(.subheadline, design: .monospaced, weight: .regular)
+    }
+
+    /// Title 3 - scales with .title3, serif
+    static var bakeryTitle3: Font {
+        .system(.title3, design: .serif, weight: .medium)
     }
 }
 
@@ -237,6 +287,30 @@ extension View {
 
 // MARK: - Custom Components
 
+struct WarmCardElevatedStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .background(Color.flourWhite)
+            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.lg, style: .continuous))
+            .shadow(
+                color: Color.terracotta.opacity(0.12),
+                radius: 8,
+                x: 0,
+                y: 4
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: CornerRadius.lg, style: .continuous)
+                    .stroke(Color.terracotta.opacity(0.2), lineWidth: 1.5)
+            )
+    }
+}
+
+extension View {
+    func warmCardElevated() -> some View {
+        modifier(WarmCardElevatedStyle())
+    }
+}
+
 struct WarmDivider: View {
     var body: some View {
         Rectangle()
@@ -312,6 +386,7 @@ struct SectionBadge: View {
 
     var color: Color {
         switch section {
+        case .yudane: return .yudaneColor
         case .preferment: return .prefermentColor
         case .finalDough: return .finalDoughColor
         }

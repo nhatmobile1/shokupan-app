@@ -25,13 +25,12 @@ struct SettingsView: View {
                         // Units Section
                         settingsCard {
                             VStack(alignment: .leading, spacing: Spacing.md) {
-                                Label {
-                                    Text("Units")
-                                        .sectionHeader()
-                                } icon: {
+                                HStack(spacing: Spacing.sm) {
                                     Image(systemName: "scalemass")
                                         .font(.system(size: 12))
                                         .foregroundColor(.crustBrown)
+                                    Text("Units")
+                                        .sectionHeader()
                                 }
 
                                 Picker("Weight Units", selection: $useMetricUnits) {
@@ -45,13 +44,12 @@ struct SettingsView: View {
                         // Appearance Section
                         settingsCard {
                             VStack(alignment: .leading, spacing: Spacing.md) {
-                                Label {
-                                    Text("Appearance")
-                                        .sectionHeader()
-                                } icon: {
+                                HStack(spacing: Spacing.sm) {
                                     Image(systemName: "paintbrush")
                                         .font(.system(size: 12))
                                         .foregroundColor(.crustBrown)
+                                    Text("Appearance")
+                                        .sectionHeader()
                                 }
 
                                 HStack(spacing: Spacing.sm) {
@@ -90,13 +88,12 @@ struct SettingsView: View {
                         // Pan Size Presets Section
                         settingsCard {
                             VStack(alignment: .leading, spacing: Spacing.md) {
-                                Label {
-                                    Text("Pan Sizes")
-                                        .sectionHeader()
-                                } icon: {
+                                HStack(spacing: Spacing.sm) {
                                     Image(systemName: "square.resize")
                                         .font(.system(size: 12))
                                         .foregroundColor(.crustBrown)
+                                    Text("Pan Sizes")
+                                        .sectionHeader()
                                 }
 
                                 VStack(spacing: Spacing.sm) {
@@ -118,14 +115,14 @@ struct SettingsView: View {
                                         Image(systemName: "arrow.counterclockwise")
                                             .font(.system(size: 12))
                                         Text("Reset to Defaults")
-                                            .font(.bakeryBody(14))
+                                            .font(.bakerySubheadline)
                                     }
                                     .foregroundColor(.terracotta)
                                 }
                                 .padding(.top, Spacing.sm)
 
                                 Text("Customize flour amounts for your pan sizes. These appear as quick presets when scaling recipes.")
-                                    .font(.bakeryBody(12))
+                                    .font(.bakeryCaption)
                                     .foregroundColor(.stoneGray)
                                     .padding(.top, Spacing.xs)
                             }
@@ -134,20 +131,19 @@ struct SettingsView: View {
                         // Dough Temperature Section
                         settingsCard {
                             VStack(alignment: .leading, spacing: Spacing.md) {
-                                Label {
-                                    Text("Dough Temperature")
-                                        .sectionHeader()
-                                } icon: {
+                                HStack(spacing: Spacing.sm) {
                                     Image(systemName: "thermometer.medium")
                                         .font(.system(size: 12))
                                         .foregroundColor(.crustBrown)
+                                    Text("Dough Temperature")
+                                        .sectionHeader()
                                 }
 
                                 VStack(spacing: Spacing.sm) {
                                     // Mixing Method Picker
                                     HStack {
                                         Text("Mixing method")
-                                            .font(.bakeryBody(15))
+                                            .font(.bakeryBodyDynamic)
                                             .foregroundColor(.inkBrown)
 
                                         Spacer()
@@ -173,7 +169,7 @@ struct SettingsView: View {
                                     // Default DDT
                                     HStack {
                                         Text("Target DDT")
-                                            .font(.bakeryBody(15))
+                                            .font(.bakeryBodyDynamic)
                                             .foregroundColor(.inkBrown)
 
                                         Spacer()
@@ -193,7 +189,7 @@ struct SettingsView: View {
                                                 )
 
                                             Text(useMetricUnits ? "°C" : "°F")
-                                                .font(.bakeryBody(13))
+                                                .font(.bakerySubheadline)
                                                 .foregroundColor(.stoneGray)
                                         }
                                     }
@@ -203,7 +199,7 @@ struct SettingsView: View {
                                     // Friction Factor
                                     HStack {
                                         Text("Friction factor")
-                                            .font(.bakeryBody(15))
+                                            .font(.bakeryBodyDynamic)
                                             .foregroundColor(.inkBrown)
 
                                         Spacer()
@@ -223,14 +219,14 @@ struct SettingsView: View {
                                                 )
 
                                             Text(useMetricUnits ? "°C" : "°F")
-                                                .font(.bakeryBody(13))
+                                                .font(.bakerySubheadline)
                                                 .foregroundColor(.stoneGray)
                                         }
                                     }
                                 }
 
                                 Text("These defaults pre-fill the DDT calculator. Desired Dough Temperature helps you calculate the right water temperature for consistent results.")
-                                    .font(.bakeryBody(12))
+                                    .font(.bakeryCaption)
                                     .foregroundColor(.stoneGray)
                                     .padding(.top, Spacing.xs)
                             }
@@ -239,13 +235,12 @@ struct SettingsView: View {
                         // Account Section
                         settingsCard {
                             VStack(alignment: .leading, spacing: Spacing.md) {
-                                Label {
-                                    Text("Account")
-                                        .sectionHeader()
-                                } icon: {
+                                HStack(spacing: Spacing.sm) {
                                     Image(systemName: "person")
                                         .font(.system(size: 12))
                                         .foregroundColor(.crustBrown)
+                                    Text("Account")
+                                        .sectionHeader()
                                 }
 
                                 NavigationLink {
@@ -264,10 +259,10 @@ struct SettingsView: View {
 
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text("Sign In")
-                                                .font(.bakeryBodyMedium(16))
+                                                .font(.bakeryBodyMediumDynamic)
                                                 .foregroundColor(.inkBrown)
                                             Text("Sync recipes across devices")
-                                                .font(.bakeryBody(13))
+                                                .font(.bakerySubheadline)
                                                 .foregroundColor(.stoneGray)
                                         }
 
@@ -285,13 +280,12 @@ struct SettingsView: View {
                         // About Section
                         settingsCard {
                             VStack(alignment: .leading, spacing: Spacing.md) {
-                                Label {
-                                    Text("About")
-                                        .sectionHeader()
-                                } icon: {
+                                HStack(spacing: Spacing.sm) {
                                     Image(systemName: "info.circle")
                                         .font(.system(size: 12))
                                         .foregroundColor(.crustBrown)
+                                    Text("About")
+                                        .sectionHeader()
                                 }
 
                                 VStack(spacing: 0) {
@@ -354,7 +348,7 @@ struct SettingsView: View {
     private func panSizeRow(label: String, value: Binding<Double>) -> some View {
         HStack {
             Text(label)
-                .font(.bakeryBody(15))
+                .font(.bakeryBodyDynamic)
                 .foregroundColor(.inkBrown)
 
             Spacer()
@@ -374,7 +368,7 @@ struct SettingsView: View {
                     )
 
                 Text("g flour")
-                    .font(.bakeryBody(13))
+                    .font(.bakerySubheadline)
                     .foregroundColor(.stoneGray)
             }
         }
@@ -383,11 +377,11 @@ struct SettingsView: View {
     private func aboutRow(title: String, value: String) -> some View {
         HStack {
             Text(title)
-                .font(.bakeryBody(15))
+                .font(.bakeryBodyDynamic)
                 .foregroundColor(.inkBrown)
             Spacer()
             Text(value)
-                .font(.bakeryMono(14))
+                .font(.bakeryMonoSubheadline)
                 .foregroundColor(.stoneGray)
         }
     }
@@ -395,7 +389,7 @@ struct SettingsView: View {
     private func aboutLinkRow(title: String, icon: String) -> some View {
         HStack {
             Text(title)
-                .font(.bakeryBody(15))
+                .font(.bakeryBodyDynamic)
                 .foregroundColor(.inkBrown)
             Spacer()
             Image(systemName: icon)
@@ -503,7 +497,7 @@ struct ProfilePlaceholderView: View {
                         .foregroundColor(.inkBrown)
 
                     Text("Sign in to sync your recipes across all your devices and back them up to the cloud.")
-                        .font(.bakeryBody(15))
+                        .font(.bakeryBodyDynamic)
                         .foregroundColor(.stoneGray)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Spacing.xl)

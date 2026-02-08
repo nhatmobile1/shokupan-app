@@ -213,7 +213,7 @@ struct RecipeListView: View {
                 .foregroundColor(.stoneGray.opacity(0.5))
 
             Text("No recipes found")
-                .font(.bakeryBody(15))
+                .font(.bakeryBodyDynamic)
                 .foregroundColor(.stoneGray)
         }
         .frame(maxWidth: .infinity)
@@ -242,7 +242,7 @@ struct RecipeCard: View {
             // Content
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 Text(recipe.name)
-                    .font(.bakerySerifMedium(18))
+                    .font(.bakeryTitle)
                     .foregroundColor(.inkBrown)
                     .lineLimit(1)
 
@@ -263,7 +263,7 @@ struct RecipeCard: View {
                         }
                         if recipe.tags.count > 2 {
                             Text("+\(recipe.tags.count - 2)")
-                                .font(.bakeryBody(11))
+                                .font(.bakeryCaption)
                                 .foregroundColor(.stoneGray)
                         }
                     }
@@ -273,6 +273,8 @@ struct RecipeCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .warmCard(elevated: false)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(recipe.name), \(formatWeight(recipe.totalFlourGrams)) flour, \(Int(recipe.hydrationPercentage))% hydration")
     }
 
     @ViewBuilder

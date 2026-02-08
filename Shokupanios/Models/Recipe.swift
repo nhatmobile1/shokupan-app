@@ -104,6 +104,7 @@ class Ingredient {
 }
 
 enum IngredientSection: String, Codable, CaseIterable {
+    case yudane = "Yudane"
     case preferment = "Preferment"
     case finalDough = "Final Dough"
 }

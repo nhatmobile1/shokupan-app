@@ -62,36 +62,33 @@ struct TimerDetailView: View {
     // MARK: - Countdown Section
 
     private var countdownSection: some View {
-        VStack(spacing: Spacing.md) {
-            // Large countdown
-            Text(timerManager.displayTime.formatted)
-                .font(.system(size: 72, weight: .light, design: .monospaced))
-                .foregroundColor(.inkBrown)
-                .monospacedDigit()
-
-            // Progress ring
+        VStack(spacing: Spacing.lg) {
+            // Progress ring with countdown integrated
             ZStack {
                 Circle()
                     .stroke(Color.panCrumb, lineWidth: 8)
-                    .frame(width: 200, height: 200)
+                    .frame(width: 220, height: 220)
 
                 Circle()
                     .trim(from: 0, to: timer.overallProgress)
                     .stroke(Color.terracotta, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                    .frame(width: 200, height: 200)
+                    .frame(width: 220, height: 220)
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 0.5), value: timer.overallProgress)
 
                 VStack(spacing: Spacing.xs) {
-                    Text("\(Int(timer.overallProgress * 100))%")
-                        .font(.bakeryMono(24))
-                        .foregroundColor(.terracotta)
+                    Text(timerManager.displayTime.formatted)
+                        .font(.system(size: 48, weight: .light, design: .monospaced))
+                        .foregroundColor(.inkBrown)
+                        .monospacedDigit()
 
-                    Text("Complete")
-                        .font(.bakeryBody(12))
+                    Text("\(Int(timer.overallProgress * 100))% complete")
+                        .font(.bakeryCaption)
                         .foregroundColor(.stoneGray)
                 }
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Timer: \(timerManager.displayTime.formatted), \(Int(timer.overallProgress * 100)) percent complete")
         }
         .padding(Spacing.lg)
         .warmCard()
@@ -108,18 +105,18 @@ struct TimerDetailView: View {
                 Spacer()
 
                 Text("Step \(timer.currentStepIndex + 1) of \(timer.steps.count)")
-                    .font(.bakeryBody(12))
+                    .font(.bakeryCaption)
                     .foregroundColor(.stoneGray)
             }
 
             HStack {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(step.name)
-                        .font(.bakerySerifMedium(20))
+                        .font(.bakeryTitle)
                         .foregroundColor(.inkBrown)
 
                     Text("Duration: \(step.formattedDuration)")
-                        .font(.bakeryBody(14))
+                        .font(.bakerySubheadline)
                         .foregroundColor(.stoneGray)
                 }
 
@@ -152,7 +149,7 @@ struct TimerDetailView: View {
                     Image(systemName: "forward.fill")
                         .font(.system(size: 20))
                     Text("Skip")
-                        .font(.bakeryBody(12))
+                        .font(.bakeryCaption)
                 }
                 .foregroundColor(.stoneGray)
                 .frame(width: 70, height: 70)
@@ -162,6 +159,7 @@ struct TimerDetailView: View {
                         .shadow(color: Color.warmBrown.opacity(0.1), radius: 4, x: 0, y: 2)
                 )
             }
+            .accessibilityLabel("Skip to next step")
 
             // Play/Pause Button (Large)
             Button {
@@ -182,6 +180,7 @@ struct TimerDetailView: View {
                             .shadow(color: Color.terracotta.opacity(0.3), radius: 8, x: 0, y: 4)
                     )
             }
+            .accessibilityLabel(timerManager.isRunning ? "Pause timer" : "Resume timer")
 
             // Reset Button
             Button {
@@ -192,7 +191,7 @@ struct TimerDetailView: View {
                     Image(systemName: "arrow.counterclockwise")
                         .font(.system(size: 20))
                     Text("Reset")
-                        .font(.bakeryBody(12))
+                        .font(.bakeryCaption)
                 }
                 .foregroundColor(.stoneGray)
                 .frame(width: 70, height: 70)
@@ -202,6 +201,7 @@ struct TimerDetailView: View {
                         .shadow(color: Color.warmBrown.opacity(0.1), radius: 4, x: 0, y: 2)
                 )
             }
+            .accessibilityLabel("Reset timer")
         }
         .padding(.vertical, Spacing.md)
     }
@@ -266,11 +266,11 @@ struct TimerStepRow: View {
             // Step info
             VStack(alignment: .leading, spacing: 2) {
                 Text(step.name)
-                    .font(isCurrent ? .bakeryBodyMedium(15) : .bakeryBody(15))
+                    .font(isCurrent ? .bakeryBodyMediumDynamic : .bakeryBodyDynamic)
                     .foregroundColor(isCurrent ? .inkBrown : (isCompleted ? .stoneGray : .inkBrown))
 
                 Text(step.formattedDuration)
-                    .font(.bakeryMono(12))
+                    .font(.bakeryMonoCaption)
                     .foregroundColor(.stoneGray)
             }
 
@@ -284,18 +284,20 @@ struct TimerStepRow: View {
                         .frame(width: 6, height: 6)
 
                     Text("Now")
-                        .font(.bakeryBody(12))
+                        .font(.bakeryCaption)
                         .foregroundColor(.terracotta)
                 }
             }
         }
         .padding(.vertical, Spacing.sm)
         .opacity(isCompleted && !isCurrent ? 0.6 : 1.0)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(step.name), \(step.formattedDuration)\(isCurrent ? ", current step" : "")\(isCompleted ? ", completed" : "")")
     }
 
     private var backgroundColor: Color {
         if isCompleted {
-            return .green
+            return .stepCompleted
         } else if isCurrent {
             return .terracotta
         } else {
@@ -323,6 +325,8 @@ struct CircularProgressView: View {
                 .font(.bakeryMono(10))
                 .foregroundColor(.terracotta)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(Int(progress * 100)) percent complete")
     }
 }
 

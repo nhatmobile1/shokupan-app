@@ -58,18 +58,18 @@ struct AddRecipeView: View {
                                         .foregroundColor(.terracotta.opacity(0.8))
 
                                     Text("Template")
-                                        .font(.bakeryBody(15))
+                                        .font(.bakeryBodyDynamic)
                                         .foregroundColor(.inkBrown)
 
                                     Spacer()
 
                                     if let template = selectedTemplate {
                                         Text(template.name)
-                                            .font(.bakeryBody(14))
+                                            .font(.bakerySubheadline)
                                             .foregroundColor(.stoneGray)
                                     } else {
                                         Text("None (Blank)")
-                                            .font(.bakeryBody(14))
+                                            .font(.bakerySubheadline)
                                             .foregroundColor(.stoneGray)
                                     }
 
@@ -93,7 +93,7 @@ struct AddRecipeView: View {
                                         Image(systemName: "xmark.circle")
                                             .font(.system(size: 12))
                                         Text("Clear Template")
-                                            .font(.bakeryBody(13))
+                                            .font(.bakerySubheadline)
                                     }
                                     .foregroundColor(.terracotta)
                                 }
@@ -116,13 +116,13 @@ struct AddRecipeView: View {
                                         .foregroundColor(.terracotta.opacity(0.8))
 
                                     Text("Timer")
-                                        .font(.bakeryBody(15))
+                                        .font(.bakeryBodyDynamic)
                                         .foregroundColor(.inkBrown)
 
                                     Spacer()
 
                                     Text(selectedTimerPresetName ?? "None")
-                                        .font(.bakeryBody(14))
+                                        .font(.bakerySubheadline)
                                         .foregroundColor(.stoneGray)
 
                                     Image(systemName: "chevron.right")
@@ -145,7 +145,7 @@ struct AddRecipeView: View {
                                         Image(systemName: "xmark.circle")
                                             .font(.system(size: 12))
                                         Text("Clear Timer")
-                                            .font(.bakeryBody(13))
+                                            .font(.bakerySubheadline)
                                     }
                                     .foregroundColor(.terracotta)
                                 }
@@ -160,7 +160,7 @@ struct AddRecipeView: View {
                                 .sectionHeader()
 
                             TextField("Recipe Name", text: $name)
-                                .font(.bakeryBody(16))
+                                .font(.bakeryBodyDynamic)
                                 .foregroundColor(.inkBrown)
                                 .padding(Spacing.md)
                                 .background(
@@ -183,7 +183,7 @@ struct AddRecipeView: View {
                                     .foregroundColor(.inkBrown)
 
                                 Text("grams")
-                                    .font(.bakeryBody(16))
+                                    .font(.bakeryBodyDynamic)
                                     .foregroundColor(.stoneGray)
                             }
                             .padding(Spacing.md)
@@ -212,13 +212,13 @@ struct AddRecipeView: View {
                                 } label: {
                                     HStack {
                                         Text(preset.0)
-                                            .font(.bakeryBodyMedium(15))
+                                            .font(.bakeryBodyMediumDynamic)
                                             .foregroundColor(.inkBrown)
 
                                         Spacer()
 
                                         Text("\(Int(preset.1))g")
-                                            .font(.bakeryMono(13))
+                                            .font(.bakeryMonoCaption)
                                             .foregroundColor(.stoneGray)
 
                                         if totalFlourGrams == preset.1 {
@@ -248,18 +248,18 @@ struct AddRecipeView: View {
                                 ForEach(template.ingredients) { ingredient in
                                     HStack {
                                         Text(ingredient.name)
-                                            .font(.bakeryBody(15))
+                                            .font(.bakeryBodyDynamic)
                                             .foregroundColor(.inkBrown)
 
                                         Spacer()
 
                                         VStack(alignment: .trailing, spacing: 2) {
                                             Text(formatWeight(totalFlourGrams * ingredient.percentage))
-                                                .font(.bakeryMono(15))
+                                                .font(.bakeryMonoDynamic)
                                                 .foregroundColor(.inkBrown)
 
                                             Text(formatPercentage(ingredient.percentage * 100))
-                                                .font(.bakeryMono(12))
+                                                .font(.bakeryMonoCaption)
                                                 .foregroundColor(.stoneGray)
                                         }
                                     }
@@ -281,7 +281,7 @@ struct AddRecipeView: View {
 
                             ZStack(alignment: .topLeading) {
                                 TextEditor(text: $instructions)
-                                    .font(.bakeryBody(15))
+                                    .font(.bakeryBodyDynamic)
                                     .foregroundColor(.inkBrown)
                                     .frame(minHeight: 120)
                                     .padding(Spacing.sm)
@@ -289,7 +289,7 @@ struct AddRecipeView: View {
 
                                 if instructions.isEmpty {
                                     Text("Step-by-step instructions...")
-                                        .font(.bakeryBody(15))
+                                        .font(.bakeryBodyDynamic)
                                         .foregroundColor(.stoneGray.opacity(0.6))
                                         .padding(Spacing.sm)
                                         .padding(.top, 8)
@@ -312,7 +312,7 @@ struct AddRecipeView: View {
 
                             ZStack(alignment: .topLeading) {
                                 TextEditor(text: $notes)
-                                    .font(.bakeryBody(15))
+                                    .font(.bakeryBodyDynamic)
                                     .foregroundColor(.inkBrown)
                                     .frame(minHeight: 100)
                                     .padding(Spacing.sm)
@@ -320,7 +320,7 @@ struct AddRecipeView: View {
 
                                 if notes.isEmpty {
                                     Text("Results, experiments, observations...")
-                                        .font(.bakeryBody(15))
+                                        .font(.bakeryBodyDynamic)
                                         .foregroundColor(.stoneGray.opacity(0.6))
                                         .padding(Spacing.sm)
                                         .padding(.top, 8)
@@ -352,7 +352,7 @@ struct AddRecipeView: View {
                     Button("Save") {
                         saveRecipe()
                     }
-                    .font(.bakeryBodyMedium(16))
+                    .font(.bakeryBodyMediumDynamic)
                     .foregroundColor(.terracotta)
                     .disabled(name.isEmpty)
                 }
@@ -431,7 +431,7 @@ struct TemplatePickerView: View {
                                         .foregroundColor(.crustBrown)
 
                                     Text("Blank Recipe")
-                                        .font(.bakeryBodyMedium(15))
+                                        .font(.bakeryBodyMediumDynamic)
                                         .foregroundColor(.inkBrown)
 
                                     Spacer()
@@ -537,7 +537,7 @@ struct TemplatePickerRow: View {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     HStack(spacing: Spacing.sm) {
                         Text(template.name)
-                            .font(.bakeryBodyMedium(15))
+                            .font(.bakeryBodyMediumDynamic)
                             .foregroundColor(.inkBrown)
 
                         if template.isBuiltIn {
@@ -549,7 +549,7 @@ struct TemplatePickerRow: View {
 
                     if !template.descriptionText.isEmpty {
                         Text(template.descriptionText)
-                            .font(.bakeryBody(13))
+                            .font(.bakerySubheadline)
                             .foregroundColor(.stoneGray)
                             .lineLimit(1)
                     }
@@ -559,7 +559,7 @@ struct TemplatePickerRow: View {
                             Image(systemName: "list.bullet")
                                 .font(.system(size: 10))
                             Text("\(template.ingredients.count)")
-                                .font(.bakeryMono(11))
+                                .font(.bakeryMonoCaption)
                         }
                         .foregroundColor(.stoneGray)
 
@@ -568,7 +568,7 @@ struct TemplatePickerRow: View {
                                 Image(systemName: "drop.fill")
                                     .font(.system(size: 10))
                                 Text("\(Int(template.hydrationPercentage))%")
-                                    .font(.bakeryMono(11))
+                                    .font(.bakeryMonoCaption)
                             }
                             .foregroundColor(.terracotta.opacity(0.7))
                         }
